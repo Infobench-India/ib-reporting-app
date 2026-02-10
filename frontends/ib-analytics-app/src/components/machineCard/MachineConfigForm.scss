@@ -1,0 +1,154 @@
+.machine-config-form {
+  padding: 20px;
+
+  .card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+
+    .card-header {
+      padding: 15px 20px;
+      border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+
+      h5,
+      h6 {
+        margin: 0;
+        font-weight: 600;
+      }
+    }
+
+    .card-body {
+      padding: 20px;
+    }
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+
+    label {
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .form-control,
+    .form-select {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 8px 12px;
+      font-size: 14px;
+
+      &:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+      }
+
+      &:disabled {
+        background-color: #e9ecef;
+        opacity: 0.65;
+      }
+    }
+  }
+
+  .table {
+    margin-bottom: 0;
+
+    thead {
+      th {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        color: #333;
+        padding: 12px;
+      }
+    }
+
+    tbody {
+      tr {
+        &:hover {
+          background-color: #f8f9fa;
+        }
+
+        td {
+          padding: 12px;
+          vertical-align: middle;
+        }
+      }
+    }
+  }
+
+  .badge {
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+  }
+
+  .btn {
+    border-radius: 4px;
+    font-weight: 500;
+    padding: 8px 12px;
+    font-size: 14px;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  .d-flex {
+    &.gap-2 {
+      gap: 12px;
+
+      .btn {
+        flex: 1;
+
+        @media (max-width: 576px) {
+          flex: auto;
+          width: 100%;
+          margin-bottom: 10px;
+        }
+      }
+    }
+  }
+
+  .alert {
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+  }
+
+  .modal-body {
+    padding: 20px;
+
+    .card {
+      margin-bottom: 15px;
+    }
+  }
+
+  .modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #dee2e6;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    padding: 15px;
+
+    .table {
+      font-size: 13px;
+
+      th,
+      td {
+        padding: 8px;
+      }
+
+      .btn {
+        padding: 4px 8px;
+        font-size: 12px;
+      }
+    }
+
+    .form-group label {
+      font-size: 14px;
+    }
+  }
+}

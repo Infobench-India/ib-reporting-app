@@ -1,0 +1,61 @@
+.DialogTop
+{
+    margin-top: 100px;
+    border: 4px solid blue;
+}
+
+.custom-modal .modal-content {
+    height: 150vh !important; /* set height relative to viewport */
+    overflow-y: auto; /* enable scroll if content overflows */
+  }
+
+  .DialogTool
+  {
+    border: 4px solid blue;
+  }
+
+  .custom-modal
+  {
+    margin-top: 100px !important;
+    /* border: 4px solid blue; */
+  }
+
+  .custom-modal .modal-content
+  {
+    margin-top: 100px !important;
+    width:1300px !important;
+    height: 700px !important;
+    margin-left: -350px;
+    border: 3px solid blue;
+  }
+
+  .previewStyle
+  {
+   margin-left: 20px;
+   margin-right: 20px;
+  }
+
+  .selectComv
+  {
+    margin-left: 50px;
+    font-size: 18px;
+  }
+
+  .tableSpace
+  {
+    margin-bottom: 20px !important;
+  }
+
+  .convDD
+  {
+    border: 1px solid black;
+    font-size: 17px;
+    font-weight: bold;
+    margin-left: 10px;
+  }
+
+  .toolPartHead
+  {
+    text-align: center !important;
+    color: #191970;
+  }

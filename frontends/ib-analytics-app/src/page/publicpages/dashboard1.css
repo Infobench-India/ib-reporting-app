@@ -1,0 +1,39 @@
+/* ===== ROOT ===== */
+.dashboard-root {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ===== KPI ROW HEIGHT REDUCTION ===== */
+.dashboard-kpi-row {
+  flex: 0 0 18vh;
+}
+
+/* ===== MIDDLE ROW ===== */
+.dashboard-middle-row {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* ===== BOTTOM ROW (FORCE VISIBILITY) ===== */
+.dashboard-bottom-row {
+  flex: 0 0 28vh;
+}
+
+/* ===== TILES (IMPORTANT) ===== */
+.tile-card,
+.tv-tile {
+  min-height: 90px !important;
+  padding: 8px !important;
+}
+
+/* ===== CARD BODY COMPRESSION ===== */
+.card-body-tight {
+  padding: 8px !important;
+}
+
+/* ===== CHART HEIGHT CONTROL ===== */
+.chart-box {
+  max-height: 100%;
+  overflow: hidden;
+}

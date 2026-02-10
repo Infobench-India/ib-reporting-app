@@ -1,0 +1,194 @@
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 19:10:00.379"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 19:10:02.383"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 19:10:03.218"}
+{"level":"info","message":"Found 1 schedules due for execution.","timestamp":"2026-02-08 19:10:03.250"}
+{"level":"info","message":"Due schedules: t1","timestamp":"2026-02-08 19:10:03.251"}
+{"level":"info","message":"Executing schedule: t1 for report: ENERGY DAILY REPORT1","timestamp":"2026-02-08 19:10:03.252"}
+{"level":"warn","message":"No data found for schedule t1","timestamp":"2026-02-08 19:10:03.543"}
+{"level":"warn","message":"No data found for schedule t1, sending empty report structure.","timestamp":"2026-02-08 19:10:03.544"}
+{"level":"info","message":"Calling reporting API with metadata: {\"TemplatePath\":\"C:\\\\Program Files (x86)\\\\InfobenchReportingWorkerService\\\\templates\\\\creticalWiseAnalysisWithChart1.xlsx\",\"SheetName\":\"Report\",\"FromDate\":\"2024-08-10\",\"ToDate\":\"2024-08-10\",\"maxRowPerPage\":\"21\",\"maxAvailableRowPerPage\":\"43\",\"sumStartColumnNumber\":2,\"maxSumStartColumnNumber\":0,\"reportHeaderBlankRowCount\":7,\"reportHeaderStartRowNo\":8,\"reportHeaderRowCount\":3,\"tableHeaderStartRowNo\":11,\"tableHeaderRowCount\":2,\"reportDateRow\":8,\"reportDateColumn\":2,\"fromDateRow\":9,\"fromDateColumn\":2,\"toDateRow\":10,\"toDateColumn\":2,\"footerRowCount\":2,\"isGraphSupported\":true,\"isTabularSupported\":true}","timestamp":"2026-02-08 19:10:03.840"}
+{"level":"error","message":"Error executing schedule t1: ","timestamp":"2026-02-08 19:10:04.149"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 19:15:00.065"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 19:15:00.087"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 19:15:02.366"}
+{"level":"info","message":"Found 1 schedules due for execution.","timestamp":"2026-02-08 19:15:02.437"}
+{"level":"info","message":"Due schedules: t1","timestamp":"2026-02-08 19:15:02.446"}
+{"level":"info","message":"Executing schedule: t1 for report: ENERGY DAILY REPORT1","timestamp":"2026-02-08 19:15:02.448"}
+{"level":"warn","message":"No data found for schedule t1","timestamp":"2026-02-08 19:15:04.323"}
+{"level":"warn","message":"No data found for schedule t1, sending empty report structure.","timestamp":"2026-02-08 19:15:04.368"}
+{"level":"info","message":"Calling reporting API with metadata: {\"TemplatePath\":\"C:\\\\Program Files (x86)\\\\InfobenchReportingWorkerService\\\\templates\\\\creticalWiseAnalysisWithChart1.xlsx\",\"SheetName\":\"Report\",\"FromDate\":\"2024-08-10\",\"ToDate\":\"2024-08-10\",\"maxRowPerPage\":\"21\",\"maxAvailableRowPerPage\":\"43\",\"sumStartColumnNumber\":2,\"maxSumStartColumnNumber\":0,\"reportHeaderBlankRowCount\":7,\"reportHeaderStartRowNo\":8,\"reportHeaderRowCount\":3,\"tableHeaderStartRowNo\":11,\"tableHeaderRowCount\":2,\"reportDateRow\":8,\"reportDateColumn\":2,\"fromDateRow\":9,\"fromDateColumn\":2,\"toDateRow\":10,\"toDateColumn\":2,\"footerRowCount\":2,\"isGraphSupported\":true,\"isTabularSupported\":true}","timestamp":"2026-02-08 19:15:04.379"}
+{"level":"error","message":"Error executing schedule t1: ","timestamp":"2026-02-08 19:15:04.412"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 19:20:00.117"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 19:20:00.123"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 19:20:00.601"}
+{"level":"info","message":"Found 1 schedules due for execution.","timestamp":"2026-02-08 19:20:00.798"}
+{"level":"info","message":"Due schedules: t1","timestamp":"2026-02-08 19:20:00.811"}
+{"level":"info","message":"Executing schedule: t1 for report: ENERGY DAILY REPORT1","timestamp":"2026-02-08 19:20:00.812"}
+{"level":"warn","message":"No data found for schedule t1","timestamp":"2026-02-08 19:20:01.444"}
+{"level":"warn","message":"No data found for schedule t1, sending empty report structure.","timestamp":"2026-02-08 19:20:01.445"}
+{"level":"info","message":"Calling reporting API with metadata: {\"TemplatePath\":\"C:\\\\Program Files (x86)\\\\InfobenchReportingWorkerService\\\\templates\\\\creticalWiseAnalysisWithChart1.xlsx\",\"SheetName\":\"Report\",\"FromDate\":\"2024-08-10\",\"ToDate\":\"2024-08-10\",\"maxRowPerPage\":\"21\",\"maxAvailableRowPerPage\":\"43\",\"sumStartColumnNumber\":2,\"maxSumStartColumnNumber\":0,\"reportHeaderBlankRowCount\":7,\"reportHeaderStartRowNo\":8,\"reportHeaderRowCount\":3,\"tableHeaderStartRowNo\":11,\"tableHeaderRowCount\":2,\"reportDateRow\":8,\"reportDateColumn\":2,\"fromDateRow\":9,\"fromDateColumn\":2,\"toDateRow\":10,\"toDateColumn\":2,\"footerRowCount\":2,\"isGraphSupported\":true,\"isTabularSupported\":true}","timestamp":"2026-02-08 19:20:01.445"}
+{"level":"error","message":"Error executing schedule t1: ","timestamp":"2026-02-08 19:20:01.469"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 19:25:00.051"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 19:25:00.053"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 19:25:00.548"}
+{"level":"info","message":"Found 1 schedules due for execution.","timestamp":"2026-02-08 19:25:00.575"}
+{"level":"info","message":"Due schedules: t1","timestamp":"2026-02-08 19:25:00.576"}
+{"level":"info","message":"Executing schedule: t1 for report: ENERGY DAILY REPORT1","timestamp":"2026-02-08 19:25:00.577"}
+{"level":"warn","message":"No data found for schedule t1","timestamp":"2026-02-08 19:25:01.342"}
+{"level":"warn","message":"No data found for schedule t1, sending empty report structure.","timestamp":"2026-02-08 19:25:01.343"}
+{"level":"info","message":"Calling reporting API with metadata: {\"TemplatePath\":\"C:\\\\Program Files (x86)\\\\InfobenchReportingWorkerService\\\\templates\\\\creticalWiseAnalysisWithChart1.xlsx\",\"SheetName\":\"Report\",\"FromDate\":\"2024-08-10\",\"ToDate\":\"2024-08-10\",\"maxRowPerPage\":\"21\",\"maxAvailableRowPerPage\":\"43\",\"sumStartColumnNumber\":2,\"maxSumStartColumnNumber\":0,\"reportHeaderBlankRowCount\":7,\"reportHeaderStartRowNo\":8,\"reportHeaderRowCount\":3,\"tableHeaderStartRowNo\":11,\"tableHeaderRowCount\":2,\"reportDateRow\":8,\"reportDateColumn\":2,\"fromDateRow\":9,\"fromDateColumn\":2,\"toDateRow\":10,\"toDateColumn\":2,\"footerRowCount\":2,\"isGraphSupported\":true,\"isTabularSupported\":true}","timestamp":"2026-02-08 19:25:01.344"}
+{"level":"error","message":"Error executing schedule t1: ","timestamp":"2026-02-08 19:25:01.353"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 19:30:00.135"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 19:30:00.136"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 19:30:00.603"}
+{"level":"info","message":"Found 1 schedules due for execution.","timestamp":"2026-02-08 19:30:00.642"}
+{"level":"info","message":"Due schedules: t1","timestamp":"2026-02-08 19:30:00.642"}
+{"level":"info","message":"Executing schedule: t1 for report: ENERGY DAILY REPORT1","timestamp":"2026-02-08 19:30:00.643"}
+{"level":"warn","message":"No data found for schedule t1","timestamp":"2026-02-08 19:30:00.908"}
+{"level":"warn","message":"No data found for schedule t1, sending empty report structure.","timestamp":"2026-02-08 19:30:00.909"}
+{"level":"info","message":"Calling reporting API with metadata: {\"TemplatePath\":\"C:\\\\Program Files (x86)\\\\InfobenchReportingWorkerService\\\\templates\\\\creticalWiseAnalysisWithChart1.xlsx\",\"SheetName\":\"Report\",\"FromDate\":\"2024-08-10\",\"ToDate\":\"2024-08-10\",\"maxRowPerPage\":\"21\",\"maxAvailableRowPerPage\":\"43\",\"sumStartColumnNumber\":2,\"maxSumStartColumnNumber\":0,\"reportHeaderBlankRowCount\":7,\"reportHeaderStartRowNo\":8,\"reportHeaderRowCount\":3,\"tableHeaderStartRowNo\":11,\"tableHeaderRowCount\":2,\"reportDateRow\":8,\"reportDateColumn\":2,\"fromDateRow\":9,\"fromDateColumn\":2,\"toDateRow\":10,\"toDateColumn\":2,\"footerRowCount\":2,\"isGraphSupported\":true,\"isTabularSupported\":true}","timestamp":"2026-02-08 19:30:00.909"}
+{"level":"info","message":"Using SMTP_CONNECTION_STRING: smtp:****@infobench.in:Infobench_2024@smtppro.zoho.com:587/?smtp_ssl_enabled=false&from_address=no-reply@infobench.in","timestamp":"2026-02-08 19:30:33.708"}
+{"level":"info","message":"transporterConfig smtp://no-reply@infobench.in:Infobench_2024@smtppro.zoho.com:587/?smtp_ssl_enabled=false&from_address=no-reply@infobench.in","timestamp":"2026-02-08 19:30:33.716"}
+{"level":"info","message":"SMTP connection verified successfully","timestamp":"2026-02-08 19:31:08.243"}
+{"level":"info","message":"Email sent successfully: <3b1a0078-5104-b300-fa41-4939921181d2@infobench.in>","timestamp":"2026-02-08 19:31:15.867"}
+{"level":"info","message":"Successfully completed schedule: t1","timestamp":"2026-02-08 19:31:15.926"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 19:35:00.057"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 19:35:00.140"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 19:35:00.789"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 19:35:00.857"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 19:40:00.154"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 19:40:00.155"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 19:40:00.481"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 19:40:00.498"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 19:45:00.154"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 19:45:00.155"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 19:45:00.652"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 19:45:00.682"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 19:50:00.388"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 19:50:00.389"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 19:50:01.051"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 19:50:01.112"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 19:55:00.114"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 19:55:00.119"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 19:55:00.627"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 19:55:00.679"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 20:00:00.194"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 20:00:00.200"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 20:00:00.915"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 20:00:01.116"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 20:05:00.074"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 20:05:00.076"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 20:05:00.401"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 20:05:00.445"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 20:10:00.632"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 20:10:00.633"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 20:10:01.171"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 20:10:01.237"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 20:15:00.147"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 20:15:00.190"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 20:15:00.884"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 20:15:00.908"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 20:20:00.214"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 20:20:00.215"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 20:20:01.484"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 20:20:02.207"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 20:25:00.149"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 20:25:00.150"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 20:25:00.706"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 20:25:00.812"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 20:30:00.102"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 20:30:00.105"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 20:30:00.360"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 20:30:00.446"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 20:35:00.101"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 20:35:00.102"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 20:35:00.349"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 20:35:00.369"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 20:40:00.125"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 20:40:00.129"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 20:40:00.456"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 20:40:00.474"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 20:45:00.756"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 20:45:00.865"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 20:45:02.596"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 20:45:02.794"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 20:50:00.199"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 20:50:00.200"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 20:50:00.505"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 20:50:00.564"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 20:55:00.142"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 20:55:00.144"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 20:55:00.541"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 20:55:00.577"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 21:00:00.146"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 21:00:00.148"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 21:00:00.443"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 21:00:00.462"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 21:05:00.073"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 21:05:00.074"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 21:05:01.408"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 21:05:01.437"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 21:35:00.541"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 21:35:00.871"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 21:35:02.627"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 21:35:02.666"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 21:40:00.150"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 21:40:00.154"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 21:40:00.502"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 21:40:00.532"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 21:45:00.310"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 21:45:00.311"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 21:45:00.532"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 21:45:00.554"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 21:50:00.101"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 21:50:00.103"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 21:50:00.318"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 21:50:00.335"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 21:55:00.102"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 21:55:00.105"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 21:55:00.554"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 21:55:00.571"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 22:00:00.089"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 22:00:00.186"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 22:00:01.849"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 22:00:01.871"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 22:05:00.058"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 22:05:00.060"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 22:05:00.844"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 22:05:00.890"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 22:10:00.167"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 22:10:00.168"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 22:10:01.078"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 22:10:01.166"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 22:15:00.131"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 22:15:00.157"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 22:15:00.650"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 22:15:00.750"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 22:20:00.308"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 22:20:00.309"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 22:20:00.758"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 22:20:00.790"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 22:25:00.057"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 22:25:00.067"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 22:25:00.417"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 22:25:00.458"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 22:30:03.326"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 22:30:03.328"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 22:30:03.802"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 22:30:03.848"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 22:35:00.101"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 22:35:00.140"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 22:35:00.516"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 22:35:00.565"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 22:40:00.104"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 22:40:00.106"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 22:40:00.754"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 22:40:00.779"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 22:45:00.084"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 22:45:00.096"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 22:45:01.133"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 22:45:01.219"}
+{"level":"info","message":"Cron heartbeat: Checking for due report schedules...","timestamp":"2026-02-08 22:50:00.107"}
+{"level":"info","message":"Ensuring database tables exist...","timestamp":"2026-02-08 22:50:00.110"}
+{"level":"info","message":"Database tables verified/created successfully.","timestamp":"2026-02-08 22:50:00.657"}
+{"level":"info","message":"Found 0 schedules due for execution.","timestamp":"2026-02-08 22:50:00.676"}

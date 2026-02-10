@@ -1,0 +1,10 @@
+import { ThunkAction, Action } from '@reduxjs/toolkit';
+import { TypedUseSelectorHook } from 'react-redux';
+declare const hostStore: any;
+declare let store: any;
+export type AppDispatch = typeof hostStore extends undefined ? typeof store.dispatch : typeof hostStore.dispatch;
+export type RootState = ReturnType<typeof hostStore extends undefined ? typeof store.getState : typeof hostStore.getState>;
+export declare const useAppDispatch: () => any;
+export declare const useAppSelector: TypedUseSelectorHook<RootState>;
+export type AppThunk<ReturnType = void> = ThunkAction<ReturnType, RootState, unknown, Action<string>>;
+export { store };

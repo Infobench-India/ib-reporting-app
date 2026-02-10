@@ -1,0 +1,13 @@
+**/node_modules
+**/logs
+build
+*.log
+.env
+package-lock.json
+yarn.lock
+node_modules
+dist
+package-lock.json
+yarn.locks
+**/installers
+licensing-tool

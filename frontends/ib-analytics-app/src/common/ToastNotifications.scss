@@ -1,0 +1,125 @@
+.toast-notifications-container {
+    position: fixed;
+    top: var(--spacing-4);
+    right: var(--spacing-4);
+    z-index: var(--z-tooltip);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+    max-width: 400px;
+}
+
+.toast-notification {
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: var(--spacing-4);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-3);
+    animation: slideIn 0.3s ease-out;
+    min-width: 300px;
+
+    &.toast-success {
+        border-left: 4px solid var(--color-success);
+
+        .toast-icon {
+            color: var(--color-success);
+        }
+    }
+
+    &.toast-error {
+        border-left: 4px solid var(--color-danger);
+
+        .toast-icon {
+            color: var(--color-danger);
+        }
+    }
+
+    &.toast-warning {
+        border-left: 4px solid var(--color-warning);
+
+        .toast-icon {
+            color: var(--color-warning);
+        }
+    }
+
+    &.toast-info {
+        border-left: 4px solid var(--color-info);
+
+        .toast-icon {
+            color: var(--color-info);
+        }
+    }
+}
+
+.toast-icon {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+}
+
+.toast-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.toast-message {
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    margin: 0;
+    word-wrap: break-word;
+}
+
+.toast-close {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color var(--transition-fast);
+
+    &:hover {
+        color: var(--text-primary);
+    }
+}
+
+.toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background-color: var(--color-primary);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    animation: progress 5s linear;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes progress {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+}

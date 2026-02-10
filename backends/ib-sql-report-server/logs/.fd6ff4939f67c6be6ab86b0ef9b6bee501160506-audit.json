@@ -1,0 +1,55 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "logs\\.fd6ff4939f67c6be6ab86b0ef9b6bee501160506-audit.json",
+    "files": [
+        {
+            "date": 1769936381234,
+            "name": "logs\\sql-report-2026-02-01.log.1",
+            "hash": "70891816004e7ec3ed79c97afd37ee905179e1fc5615f4de681d468207b4e3ed"
+        },
+        {
+            "date": 1769937060088,
+            "name": "logs\\sql-report-2026-02-01.log.2",
+            "hash": "035198b178e6949a259e8bb79f05864dc2e45260038f28fbf7a3d70cf3b8b973"
+        },
+        {
+            "date": 1769999876413,
+            "name": "logs\\sql-report-2026-02-02.log",
+            "hash": "1f5dd9b69c6038e4a120aa401047a39eb48b786de12fe0d044e4c6851db5a917"
+        },
+        {
+            "date": 1770133364208,
+            "name": "logs\\sql-report-2026-02-03.log",
+            "hash": "87201d37718b3b700843c37ef7c3f0b186667b7b44de269c6bfe7c908798b720"
+        },
+        {
+            "date": 1770174000229,
+            "name": "logs\\sql-report-2026-02-04.log",
+            "hash": "bf448b8a38e47230b17fae7561ceacbbf2411e585de4c8fa105e8692bce55b57"
+        },
+        {
+            "date": 1770252300130,
+            "name": "logs\\sql-report-2026-02-05.log",
+            "hash": "2354fd51f4e689f38d0f08096ab99ed427b368b8459420fc3e5b1bd05a6692f2"
+        },
+        {
+            "date": 1770339000288,
+            "name": "logs\\sql-report-2026-02-06.log",
+            "hash": "b79f4ca9be8b4a8b77792e5e008d0d0914cc84718f9ae95bbd01ef8c2d17cf29"
+        },
+        {
+            "date": 1770440100672,
+            "name": "logs\\sql-report-2026-02-07.log",
+            "hash": "2794a6fb2104ebf8992c52f9d42c049c0589d84c107aeb0bf0d3b1d0b70e569c"
+        },
+        {
+            "date": 1770558000421,
+            "name": "logs\\sql-report-2026-02-08.log",
+            "hash": "0c4830b4efe1e8c5c0afe9e13d0efa3c7ad52e5992f9c8459cfe5b846c9499c8"
+        }
+    ],
+    "hashType": "sha256"
+}
