@@ -10,6 +10,8 @@ const { authenticate, authorize, authorizeRoles } = require('../middleware/auth'
 router.post('/register', AuthController.register);
 router.post('/login', AuthController.login);
 router.post('/logout', authenticate, AuthController.logout);
+router.post('/forgot-password', AuthController.forgotPassword);
+router.post('/reset-password', AuthController.resetPassword);
 router.post('/refresh-token', AuthController.refreshToken);
 router.get('/profile', authenticate, AuthController.getProfile);
 

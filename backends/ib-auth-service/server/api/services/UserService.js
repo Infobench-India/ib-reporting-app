@@ -182,6 +182,62 @@ class UserService {
       throw err;
     }
   }
+
+  static async savePasswordResetToken(userId, token, expiresAt) {
+    const pool = await getPool();
+    try {
+      const query = `
+        INSERT INTO PasswordResets (id, userId, token, expiresAt, createdAt)
+        VALUES (@id, @userId, @token, @expiresAt, GETDATE());
+      `;
+      const request = pool.request();
+      request.input('id', uuidv4());
+      request.input('userId', userId);
+      request.input('token', token);
+      request.input('expiresAt', expiresAt);
+      await request.query(query);
+    } catch (err) {
+      logger.error('Save reset token failed:', err);
+      throw err;
+    }
+  }
+
+  static async verifyResetToken(token) {
+    const pool = await getPool();
+    try {
+      const query = `
+        SELECT userId FROM PasswordResets 
+        WHERE token = @token AND expiresAt > GETDATE() AND usedAt IS NULL;
+      `;
+      const result = await pool.request().input('token', token).query(query);
+      return result.recordset[0]?.userId || null;
+    } catch (err) {
+      logger.error('Verify reset token failed:', err);
+      throw err;
+    }
+  }
+
+  static async updatePassword(userId, passwordHash) {
+    const pool = await getPool();
+    try {
+      const query = `UPDATE Users SET passwordHash = @passwordHash, updatedAt = GETDATE() WHERE id = @userId;`;
+      await pool.request().input('passwordHash', passwordHash).input('userId', userId).query(query);
+    } catch (err) {
+      logger.error('Update password failed:', err);
+      throw err;
+    }
+  }
+
+  static async invalidateResetToken(token) {
+    const pool = await getPool();
+    try {
+      const query = `UPDATE PasswordResets SET usedAt = GETDATE() WHERE token = @token;`;
+      await pool.request().input('token', token).query(query);
+    } catch (err) {
+      logger.error('Invalidate reset token failed:', err);
+      throw err;
+    }
+  }
 }
 
 module.exports = UserService;

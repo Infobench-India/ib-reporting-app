@@ -137,3 +137,18 @@ BEGIN
 END;
 
 PRINT 'RBAC Schema initialized successfully!';
+
+-- Password reset tokens table
+IF OBJECT_ID('PasswordResets', 'U') IS NULL
+BEGIN
+    CREATE TABLE PasswordResets (
+        id UNIQUEIDENTIFIER PRIMARY KEY,
+        userId NVARCHAR(36) NOT NULL,
+        token NVARCHAR(255) NOT NULL,
+        expiresAt DATETIME NOT NULL,
+        usedAt DATETIME NULL,
+        createdAt DATETIME DEFAULT GETDATE(),
+        FOREIGN KEY (userId) REFERENCES Users(id)
+    );
+    CREATE INDEX IX_PasswordResets_Token ON PasswordResets(token);
+END;

@@ -1,59 +1,97 @@
-import React, { Suspense, useState } from 'react'
-import RemoteLoader from './components/RemoteLoader'
-import Login from './components/Login'
-import useAuth from './hooks/useAuth'
-import AdminPanel from './components/AdminPanel'
+import React, { Suspense, useState, useEffect } from 'react';
+import { Toaster } from 'react-hot-toast';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Layout from './components/Layout';
+import Login from './components/Login';
+import Register from './components/Register';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
+import AdminPanel from './components/AdminPanel';
+import RemoteLoader from './components/RemoteLoader';
+import useAuth from './hooks/useAuth';
+import { Container, Spinner } from 'react-bootstrap';
 
-export default function App() {
-  const [remoteLoaded, setRemoteLoaded] = useState(false)
-  const { user, logout } = useAuth()
+// Dynamic import for Analytics MFE
+// @ts-ignore
+const AnalyticsApp = React.lazy(() => import('ib_analytics_app/App'));
 
-  return (
-    <div style={{ padding: 20 }}>
-        <h1>IB Container App (Host)</h1>
-        <p>Responsible for authentication, authorization and loading microfrontends.</p>
-
-        <div style={{ marginTop: 20 }}>
-          {!user ? (
-            <div style={{display:'flex', gap:12}}>
-              <Login />
-            </div>
-          ) : (
-            <div>
-              <div>Signed in as: {user.email} ({user.role})</div>
-              <div style={{ marginTop: 8 }}>
-                <button onClick={() => logout()}>Logout</button>
-              </div>
-            </div>
-          )}
-
-          <div style={{ marginTop: 12 }}>
-            <button onClick={async () => {
-              try {
-                await RemoteLoader.load('http://localhost:5003/assets/remoteEntry.js')
-                setRemoteLoaded(true)
-              } catch (e) {
-                console.error('Failed to load remote:', e)
-                alert('Failed to load remote. Make sure ib-analytics-app is running on port 5003')
-              }
-            }}>Load ib-analytics-app</button>
-          </div>
-
-          <AdminPanel />
-        </div>
-
-        <div style={{ marginTop: 20 }}>
-          {remoteLoaded ? (
-            <Suspense fallback={<div>Loading remote app...</div>}>
-              {/** Expect remote to expose `App` as `ib_analytics_app/App` **/}
-              {/* @ts-ignore */}
-              <RemoteApp />
-            </Suspense>
-          ) : null}
+const DashboardHome = () => (
+  <Container className="text-center py-5">
+    <h2 className="display-5 fw-bold text-primary mb-3">Dashboard Home</h2>
+    <p className="lead text-muted mx-auto" style={{ maxWidth: '600px' }}>
+      Welcome to the Infobench Reporting System. Use the sidebar to navigate between different microfrontends and analytical reports.
+    </p>
+    <div className="row g-4 mt-4">
+      <div className="col-md-4">
+        <div className="p-4 bg-white rounded-3 shadow-sm border h-100">
+          <h4 className="fw-bold h5">Robust Auth</h4>
+          <p className="small text-muted mb-0">Secure JWT-based authentication with RBAC and session management.</p>
         </div>
       </div>
-    )
+      <div className="col-md-4">
+        <div className="p-4 bg-white rounded-3 shadow-sm border h-100">
+          <h4 className="fw-bold h5">Scalable MFEs</h4>
+          <p className="small text-muted mb-0">Independently deployable microfrontends integrated via Module Federation.</p>
+        </div>
+      </div>
+      <div className="col-md-4">
+        <div className="p-4 bg-white rounded-3 shadow-sm border h-100">
+          <h4 className="fw-bold h5">Enterprise Grade</h4>
+          <p className="small text-muted mb-0">Modular architecture designed for scale and enterprise reliability.</p>
+        </div>
+      </div>
+    </div>
+  </Container>
+);
+
+export default function App() {
+  const { user, loading } = useAuth();
+  const [view, setView] = useState('login'); // login, register, forgot, reset
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('token')) setView('reset');
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="d-flex vh-100 align-items-center justify-content-center bg-light">
+        <Spinner animation="border" variant="primary" />
+      </div>
+    );
   }
 
-  // dynamic import wrapper
-  const RemoteApp = React.lazy(() => import('ib_analytics_app/App'))
+  // Auth pages if not logged in
+  if (!user) {
+    return (
+      <div className="auth-wrapper vh-100 overflow-auto bg-light">
+        <Toaster position="top-right" />
+        {view === 'login' && <Login onToggleRegister={() => setView('register')} onToggleForgot={() => setView('forgot')} />}
+        {view === 'register' && <Register onToggleLogin={() => setView('login')} />}
+        {view === 'forgot' && <ForgotPassword onBackToLogin={() => setView('login')} />}
+        {view === 'reset' && <ResetPassword onBackToLogin={() => setView('login')} />}
+      </div>
+    );
+  }
+
+  return (
+    <Layout>
+      <Toaster position="top-right" />
+      <Routes>
+        <Route path="/" element={<DashboardHome />} />
+        <Route path="/admin" element={user.role === 'Admin' ? <AdminPanel /> : <Navigate to="/" />} />
+        <Route path="/analytics" element={
+          <Suspense fallback={
+            <div className="text-center py-5">
+              <Spinner animation="border" variant="primary" className="mb-2" />
+              <p className="text-muted">Loading Analytics Report...</p>
+            </div>
+          }>
+            <AnalyticsApp />
+          </Suspense>
+        } />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </Layout>
+  );
+}

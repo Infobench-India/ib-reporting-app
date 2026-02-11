@@ -185,6 +185,54 @@ class AuthController {
       res.status(500).json({ error: 'Failed to fetch profile' });
     }
   }
+
+  static async forgotPassword(req, res) {
+    try {
+      const { email } = req.body;
+      if (!email) return res.status(400).json({ error: 'Email is required' });
+
+      const user = await UserService.getUserByEmail(email);
+      if (!user) {
+        // Security best practice: don't reveal if user exists
+        return res.json({ message: 'If an account with that email exists, a reset link has been sent.' });
+      }
+
+      const { v4: uuidv4 } = require('uuid');
+      const token = uuidv4();
+      const expiresAt = new Date(Date.now() + 3600000); // 1 hour
+
+      await UserService.savePasswordResetToken(user.id, token, expiresAt);
+      const EmailService = require('../services/EmailService');
+      await EmailService.sendPasswordResetEmail(email, token);
+
+      res.json({ message: 'If an account with that email exists, a reset link has been sent.' });
+    } catch (err) {
+      logger.error('Forgot password failed:', err);
+      res.status(500).json({ error: 'Failed to process request' });
+    }
+  }
+
+  static async resetPassword(req, res) {
+    try {
+      const { token, newPassword } = req.body;
+      if (!token || !newPassword) return res.status(400).json({ error: 'Token and newPassword are required' });
+
+      const userId = await UserService.verifyResetToken(token);
+      if (!userId) {
+        return res.status(400).json({ error: 'Invalid or expired token' });
+      }
+
+      const { hashPassword } = require('../../utils/password');
+      const hashedPassword = await hashPassword(newPassword);
+      await UserService.updatePassword(userId, hashedPassword);
+      await UserService.invalidateResetToken(token);
+
+      res.json({ message: 'Password reset successfully' });
+    } catch (err) {
+      logger.error('Reset password failed:', err);
+      res.status(500).json({ error: 'Failed to reset password' });
+    }
+  }
 }
 
 module.exports = AuthController;
