@@ -1,0 +1,27 @@
+{
+  "name": "ib-reporting-app",
+  "version": "1.0.0",
+  "description": "Integrated Business Reporting App with Auth, RBAC, and Microfrontends",
+  "private": true,
+  "workspaces": [
+    "backends/ib-auth-service",
+    "backends/ib-sql-report-server",
+    "frontends/ib-container-app",
+    "frontends/ib-analytics-app"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "dev": "npm run dev --workspaces",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "test:auth": "npm run test --workspace=backends/ib-auth-service",
+    "test:e2e": "npm run test --workspace=frontends/ib-container-app",
+    "start:auth": "npm run dev --workspace=backends/ib-auth-service",
+    "start:report": "npm run dev --workspace=backends/ib-sql-report-server",
+    "start:container": "npm run dev --workspace=frontends/ib-container-app",
+    "start:analytics": "npm run dev --workspace=frontends/ib-analytics-app"
+  },
+  "keywords": ["auth", "rbac", "microfrontend", "monorepo"],
+  "author": "",
+  "license": "ISC"
+}

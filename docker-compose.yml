@@ -1,0 +1,130 @@
+version: '3.8'
+
+services:
+  # SQL Server Database
+  sql-server:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: ${SQL_SA_PASSWORD:-YourPasswordHere123!}
+      ACCEPT_EULA: Y
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql-data:/var/opt/mssql
+    networks:
+      - reporting-network
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${SQL_SA_PASSWORD:-YourPasswordHere123!}", "-Q", "SELECT 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # Authentication Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: backends/ib-auth-service/Dockerfile
+    container_name: ib-auth-service
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3051
+      SQL_CONFIG_DB: ${SQL_CONFIG_DB}
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-refresh-secret-key-change-in-production}
+      JWT_EXPIRY: ${JWT_EXPIRY:-15m}
+      JWT_REFRESH_EXPIRY: ${JWT_REFRESH_EXPIRY:-7d}
+    ports:
+      - "3051:3051"
+    depends_on:
+      sql-server:
+        condition: service_healthy
+    networks:
+      - reporting-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3051/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # Report Server
+  report-server:
+    build:
+      context: .
+      dockerfile: backends/ib-sql-report-server/Dockerfile
+    container_name: ib-report-server
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3052
+      SQL_CONFIG_DB: ${SQL_CONFIG_DB}
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-production}
+    ports:
+      - "3052:3052"
+    depends_on:
+      sql-server:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+    networks:
+      - reporting-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3052/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # Frontend Application
+  frontend:
+    build:
+      context: .
+      dockerfile: frontends/ib-analytics-app/Dockerfile
+    container_name: ib-analytics-app
+    environment:
+      REACT_APP_AUTH_API_URL: http://auth-service:3051/api/auth
+      REACT_APP_REPORT_API_URL: http://report-server:3052/api
+    ports:
+      - "5003:5003"
+    depends_on:
+      - auth-service
+      - report-server
+    networks:
+      - reporting-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5003/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # Container host/shell for microfrontends
+  container-app:
+    build:
+      context: .
+      dockerfile: frontends/ib-container-app/Dockerfile
+    container_name: ib-container-app
+    environment:
+      VITE_AUTH_API_URL: http://auth-service:3051/api/auth
+      VITE_REPORT_API_URL: http://report-server:3052/api
+    ports:
+      - "5000:80"
+    depends_on:
+      - auth-service
+      - report-server
+    networks:
+      - reporting-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+networks:
+  reporting-network:
+    driver: bridge
+
+volumes:
+  sql-data:
+    driver: local
