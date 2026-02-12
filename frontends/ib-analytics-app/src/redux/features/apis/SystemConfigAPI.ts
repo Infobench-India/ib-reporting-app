@@ -21,14 +21,7 @@ export const getAll = createAsyncThunk('systemConfig/getAll', async (params: IFe
     if (filter) {
       queryParams.append('filter', JSON.stringify(Object.entries(filter).map(([key, value]) => ({ id: key, value }))));
     }
-    const config: any = { headers: {} };
-    const selectedCompany = localStorage.getItem('selectedCompany');
-    if (selectedCompany) {
-      const company = JSON.parse(selectedCompany);
-      config.headers['Company-Id'] = company.id;
-    }
-
-    const response = await axios.get(`${VITE_SYSTEM_CONFIG_URL}/api/auth/systemconfigs?${queryParams.toString()}`, config);
+    const response = await API.get(`${VITE_SYSTEM_CONFIG_URL}/api/auth/systemconfigs?${queryParams.toString()}`);
 
     return response.data;
   } catch (error: any) {

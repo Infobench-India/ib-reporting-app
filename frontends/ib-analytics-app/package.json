@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "vite --host",
-    "build": "tsc && vite build --mode=production && xcopy dist ..\\..\\deploy\\frontends\\ib-analytics-ui\\dist /E /I /Y",
+    "build:fast": "vite build --mode=production",
+    "serve": "vite build --watch --mode=production",
     "preview": "vite preview --port 5003 --strictPort --host",
-    "serve": "npm run build && npm run preview",
     "copy:deploy": "xcopy dist \"C:\\Program Files (x86)\\InfobenchAnalyticsUIService\\dist\" /E /I /Y"
   },
   "dependencies": {

@@ -1,9 +1,11 @@
 import { configureStore, combineReducers, Reducer } from '@reduxjs/toolkit';
 import adminReducer from './slices/adminSlice';
+import authReducer from './slices/authSlice';
 
 // Initial state and reducers
 const staticReducers = {
     admin: adminReducer,
+    auth: authReducer,
     _root: (state = {}) => state
 };
 

@@ -1,49 +1,26 @@
 import type { IRolePolicy, ParameterConfig } from "../types/customTypes";
 
 export let APP_NAME = "analytics";
-export let navItems = [
-  // {
-  //   label: "Dashboard", href: `/${APP_NAME}/dashboard`
-  // },
-  // { label: "Home", href: `/${APP_NAME}/home` },
-  // { label: "Report View", href: `/${APP_NAME}/reportview` },
-  // {
-  //   label: "Add Machine Configs",
-  //   href: `/${APP_NAME}/machineconfigs`
-  // },
+export const getNavItems = (baseUrl: string) => [
   {
     label: "Add Schedule Configs",
-    href: `/${APP_NAME}/scheduleconfigs`
+    href: `${baseUrl}/scheduleconfigs`
   },
   {
     label: "Add Shift Configs",
-    href: `/${APP_NAME}/shiftconfigs`
+    href: `${baseUrl}/shiftconfigs`
   },
   {
     label: "Event Logs",
-    href: `/${APP_NAME}/eventlogs`
+    href: `${baseUrl}/eventlogs`
   },
   {
     label: "Report History",
-    href: `/${APP_NAME}/reporthistory`
-  },
-  // {
-  //   label: "Report Config",
-  //   href: `/${APP_NAME}/reportconfigs`
-  // },
-  // {
-  //   label: "SQL Report View",
-  //   href: `/${APP_NAME}/sqlreportview`
-  // },
-  // {
-  //   label: "SQL Report Schedule",
-  //   href: `/${APP_NAME}/sqlreportschedule`
-  // },
-  // {
-  //   label: "SQL Report History",
-  //   href: `/${APP_NAME}/sqlreporthistory`
-  // }
+    href: `${baseUrl}/reporthistory`
+  }
 ];
+
+export let navItems = []; // Keeping for backward compatibility if needed, but should use getNavItems
 
 export let rolePolicy: IRolePolicy = {
   addSKU: ['Site_Owner', 'admin', 'editor'],

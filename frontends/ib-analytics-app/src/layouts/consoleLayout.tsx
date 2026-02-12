@@ -2,16 +2,18 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { useEffect, useState } from "react";
 import TopNavBars from "../components/navBars/topNavBars";
-import { navItems } from "../constants/commonConstants";
+import { getNavItems } from "../constants/commonConstants";
 import { useAppDispatch } from "../store";
 import { loadUser } from "../redux/auth/authSlice";
 
-function ConsoleLayout() {
+function ConsoleLayout({ baseUrl }: { baseUrl: string }) {
   const auth: any = useAuth();
   const { pathname } = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const dispatch = useAppDispatch();
+
+  const navItems = getNavItems(baseUrl);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -33,9 +35,8 @@ function ConsoleLayout() {
         <div className="container-fluid">
           <div className="row">
             <main
-              className={` ${
-                isSidebarOpen ? "child-expanded" : "child-normal"
-              }`}
+              className={` ${isSidebarOpen ? "child-expanded" : "child-normal"
+                }`}
             >
               <Outlet />
             </main>

@@ -87,7 +87,7 @@ export default function App() {
               <p className="text-muted">Loading Analytics Report...</p>
             </div>
           }>
-            <AnalyticsApp />
+            <AnalyticsApp baseUrl="/apps/analytics_web_app" />
           </Suspense>
         } />
         <Route path="*" element={<Navigate to="/" />} />

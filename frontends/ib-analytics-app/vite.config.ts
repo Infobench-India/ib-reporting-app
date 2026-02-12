@@ -30,11 +30,6 @@ export default defineConfig(({ mode }: { mode: string }): UserConfig => {
             outDir: "dist/types",
           }),
         ],
-        output: {
-          entryFileNames: "assets/[name].js", // Place entry files in "assets"
-          chunkFileNames: "assets/[name].js", // Place chunks in "assets"
-          assetFileNames: "assets/[name].[ext]", // Place other assets in "assets"
-        },
       },
     },
     preview: {

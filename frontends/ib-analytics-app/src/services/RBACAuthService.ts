@@ -47,9 +47,14 @@ class AuthServiceImpl {
   }
 
   private loadFromStorage() {
-    const storedToken = localStorage.getItem('accessToken');
+    let storedToken = localStorage.getItem('accessToken');
     const storedRefreshToken = localStorage.getItem('refreshToken');
     const storedUser = localStorage.getItem('user');
+
+    // Bridge from Host Store if available
+    if (!storedToken && (window as any).__HOST_STORE__) {
+      storedToken = (window as any).__HOST_STORE__.getState().auth.accessToken;
+    }
 
     if (storedToken) this.accessToken = storedToken;
     if (storedRefreshToken) this.refreshToken = storedRefreshToken;
@@ -65,8 +70,15 @@ class AuthServiceImpl {
   private setupInterceptors() {
     this.axiosInstance.interceptors.request.use(
       (config) => {
-        if (this.accessToken) {
-          config.headers.Authorization = `Bearer ${this.accessToken}`;
+        let token = this.accessToken;
+
+        // Always try to pull most recent token from host store if integrated
+        if ((window as any).__HOST_STORE__) {
+          token = (window as any).__HOST_STORE__.getState().auth.accessToken || token;
+        }
+
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
       },

@@ -43,7 +43,7 @@ const RBACRoutes: React.FC<RBACRoutesProps> = ({ baseUrl }) => {
         <Route
           element={
             <ProtectedRoute>
-              <ConsoleLayout />
+              <ConsoleLayout baseUrl={baseUrl} />
             </ProtectedRoute>
           }
         >

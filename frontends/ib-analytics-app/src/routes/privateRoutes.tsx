@@ -25,7 +25,7 @@ const PrivateRoutes: React.FC<PrivateRoutesProps> = ({ baseUrl }) => {
   return (
     <AuthProvider>
       <Routes>
-        <Route element={<ConsoleLayout />}>
+        <Route element={<ConsoleLayout baseUrl={baseUrl} />}>
           <Route path="home" element={<Home />} />
           {/* <Route path="reportview" element={<ReportView />} /> */}
           <Route path="machineconfigs" element={<MachineConfigPage />} />

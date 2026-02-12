@@ -17,14 +17,7 @@ const getAll = createAsyncThunk('dashboard/getAll', async (params: IDashboardPar
     params.endDateTime && queryParams.append('endDateTime', params.endDateTime);
     params.isLive && queryParams.append('isLive', String(params.isLive));
 
-    const config: any = { headers: {} };
-    const selectedCompany = localStorage.getItem('selectedCompany');
-    if (selectedCompany) {
-      const company = JSON.parse(selectedCompany);
-      config.headers['Company-Id'] = company.id;
-    }
-
-    const response = await axios.get(`${VITE_SYSTEM_MES_API_URL}/api/productiondata/dashboard?${queryParams.toString()}`, config);
+    const response = await API.get(`${VITE_SYSTEM_MES_API_URL}/api/productiondata/dashboard?${queryParams.toString()}`);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {

@@ -8,13 +8,13 @@ import SystemConfig from "./redux/features/apis/SystemConfigAPI";
 import { ThemeProvider } from "./contexts/ThemeProvider";
 import * as exportedObjects from "./constants/commonConstants";
 
-const App = () => {
+const App = ({ baseUrl: propBaseUrl }: { baseUrl?: string }) => {
   const isStandalone = window.location.port === '5003';
   const dispatch = useAppDispatch();
   const readOnlySystemConfig = useAppSelector((state: RootState) => state?.systemConfigsReducer?.data?.docs);
 
   // When running in container, baseUrl should matched the container route
-  const baseUrl = isStandalone ? (import.meta.env.VITE_APP_NAME || "") : "/analytics";
+  const baseUrl = propBaseUrl || (isStandalone ? (import.meta.env.VITE_APP_NAME || "") : "/apps/analytics_web_app");
 
   useEffect(() => {
     console.log("readOnlySystemConfig started");
@@ -37,13 +37,15 @@ const App = () => {
     </ThemeProvider>
   );
 
-  return isStandalone ? (
+  return (
     <Provider store={store}>
-      <BrowserRouter>
-        {mainContent}
-      </BrowserRouter>
+      {isStandalone ? (
+        <BrowserRouter>
+          {mainContent}
+        </BrowserRouter>
+      ) : mainContent}
     </Provider>
-  ) : mainContent;
+  );
 };
 
 export default App;

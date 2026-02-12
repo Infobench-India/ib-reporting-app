@@ -21,11 +21,11 @@ const AppRoutes: React.FC<AppRoutesProps> = ({ baseUrl }) => {
   return (
     <Routes>
       {/* Public Routes */}
-      <Route path={`${baseUrl}/remote/dashboard1`} element={<Dashboard1 />} />
-      <Route path={`${baseUrl}/remote/dashboard2`} element={<Dashboard2 />} />
+      <Route path="remote/dashboard1" element={<Dashboard1 />} />
+      <Route path="remote/dashboard2" element={<Dashboard2 />} />
 
-      {/* Private Routes */}
-      <Route path={`${baseUrl}/*`} element={<PrivateRoutes baseUrl={baseUrl} />} />
+      {/* Private Routes - matches anything else */}
+      <Route path="*" element={<PrivateRoutes baseUrl={baseUrl} />} />
     </Routes>
   );
 };
