@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import { Container, Navbar, Nav, Button, Offcanvas } from 'react-bootstrap';
 import { Menu, X, LayoutDashboard, Database, Settings, LogOut, User } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
@@ -21,16 +22,16 @@ const Sidebar: React.FC<SidebarProps> = ({ show, onHide }) => {
             </Offcanvas.Header>
             <Offcanvas.Body className="p-0">
                 <Nav className="flex-column mt-3">
-                    <Nav.Link href="/" className="text-white d-flex align-items-center gap-3 p-3 hover-effect">
+                    <Nav.Link as={NavLink} to="/" className="text-white d-flex align-items-center gap-3 p-3 hover-effect">
                         <LayoutDashboard size={20} />
                         Dashboard
                     </Nav.Link>
-                    <Nav.Link href="/analytics" className="text-white d-flex align-items-center gap-3 p-3 hover-effect">
+                    <Nav.Link as={NavLink} to="/apps/analytics_web_app" className="text-white d-flex align-items-center gap-3 p-3 hover-effect">
                         <Database size={20} />
                         Analytics
                     </Nav.Link>
                     {user?.role === 'Admin' && (
-                        <Nav.Link href="/admin" className="text-white d-flex align-items-center gap-3 p-3 hover-effect">
+                        <Nav.Link as={NavLink} to="/admin" className="text-white d-flex align-items-center gap-3 p-3 hover-effect">
                             <Settings size={20} />
                             Admin Panel
                         </Nav.Link>

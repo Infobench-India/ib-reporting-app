@@ -12,7 +12,7 @@ const PORT = config.port;
 
 // CORS configuration for credentials
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || ['http://localhost:5000', 'http://localhost:5001', 'http://localhost:5003', 'http://127.0.0.1:5000', 'http://127.0.0.1:5001', 'http://127.0.0.1:5003'],
+  origin: process.env.CORS_ORIGIN || ['http://192.168.2.20:5000', 'http://localhost:5000', 'http://localhost:5001', 'http://localhost:5003', 'http://127.0.0.1:5000', 'http://127.0.0.1:5001', 'http://127.0.0.1:5003'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']

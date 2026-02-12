@@ -77,6 +77,19 @@ class RoleController {
       res.status(500).json({ error: 'Failed to remove permission' });
     }
   }
+
+  static async updateRole(req, res) {
+    try {
+      const { roleId } = req.params;
+      const updates = req.body;
+
+      await RoleService.updateRole(roleId, updates);
+      res.json({ message: 'Role updated successfully' });
+    } catch (err) {
+      logger.error('Update role failed:', err);
+      res.status(500).json({ error: 'Failed to update role' });
+    }
+  }
 }
 
 module.exports = RoleController;

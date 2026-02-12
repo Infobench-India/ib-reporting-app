@@ -28,7 +28,7 @@ export const getAll = createAsyncThunk('systemConfig/getAll', async (params: IFe
       config.headers['Company-Id'] = company.id;
     }
 
-    const response = await axios.get(`${VITE_SYSTEM_CONFIG_URL}/api/systemconfigs?${queryParams.toString()}`, config);
+    const response = await axios.get(`${VITE_SYSTEM_CONFIG_URL}/api/auth/systemconfigs?${queryParams.toString()}`, config);
 
     return response.data;
   } catch (error: any) {

@@ -19,7 +19,7 @@ import ReportConfigPage from '../page/privatepages/ReportConfigPage';
 import SQLReportViewPage from '../page/privatepages/SQLReportViewPage';
 import SQLSchedulePage from '../page/privatepages/SQLSchedulePage';
 import SQLHistoryPage from '../page/privatepages/SQLHistoryPage';
-import ErrorPage from '../page/error';
+// import ErrorPage from '../page/error';
 
 interface RBACRoutesProps {
   baseUrl: string;
@@ -147,7 +147,7 @@ const RBACRoutes: React.FC<RBACRoutesProps> = ({ baseUrl }) => {
         </Route>
 
         {/* Error Routes */}
-        <Route path="error" element={<ErrorPage />} />
+        {/* <Route path="error" element={<ErrorPage />} /> */}
         <Route path="*" element={<Navigate to="/error" replace />} />
       </Routes>
     </AuthProvider>

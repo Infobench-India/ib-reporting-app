@@ -9,9 +9,12 @@ import { ThemeProvider } from "./contexts/ThemeProvider";
 import * as exportedObjects from "./constants/commonConstants";
 
 const App = () => {
-  const isRemote = window.location.port === '5003';
+  const isStandalone = window.location.port === '5003';
   const dispatch = useAppDispatch();
   const readOnlySystemConfig = useAppSelector((state: RootState) => state?.systemConfigsReducer?.data?.docs);
+
+  // When running in container, baseUrl should matched the container route
+  const baseUrl = isStandalone ? (import.meta.env.VITE_APP_NAME || "") : "/analytics";
 
   useEffect(() => {
     console.log("readOnlySystemConfig started");
@@ -22,19 +25,25 @@ const App = () => {
     }
   }, [dispatch]);
 
-  const content = <AppRoutes baseUrl={isRemote ? APP_NAME : ""} />;
+  const content = <AppRoutes baseUrl={baseUrl} />;
 
-  if (isRemote && import.meta.env.VITE_NODE_ENV == 'development') {
+  if (isStandalone && import.meta.env.VITE_NODE_ENV == 'development') {
     localStorage.setItem("selectedCompany", JSON.stringify({ "label": "cm1", "name": "cm1", "subdomain": "cm1", "userId": "7d1a74b8-25dc-48fc-ab75-343bf3b17952", "userEmail": "system@infobench.in", "roleId": "6829909a809efb6a40347cf1", "role": "Site_Owner", "updatedAt": "2025-05-18T07:47:38.159Z", "createdAt": "2025-05-18T07:47:38.159Z", "id": "6952b01d9f1968398e980f99" }));
   }
 
-  return (
-    <Provider store={store}>
-      <ThemeProvider>
-        {isRemote ? <BrowserRouter>{content}</BrowserRouter> : content}
-      </ThemeProvider>
-    </Provider>
+  const mainContent = (
+    <ThemeProvider>
+      {content}
+    </ThemeProvider>
   );
+
+  return isStandalone ? (
+    <Provider store={store}>
+      <BrowserRouter>
+        {mainContent}
+      </BrowserRouter>
+    </Provider>
+  ) : mainContent;
 };
 
 export default App;

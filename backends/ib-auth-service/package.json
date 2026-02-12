@@ -9,6 +9,7 @@
     "start": "set NODE_ENV=production && node server.js",
     "dev": "set NODE_ENV=development && nodemon server.js",
     "init-db": "node server/utils/init-db.js",
+    "promote-admin": "node server/utils/promote-user.js",
     "build": "pkg server.js --config package.json --targets node18-win-x64 --output ../../deploy/backends/ib-auth-service/dist/server.exe"
   },
   "keywords": [

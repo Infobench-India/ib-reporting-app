@@ -1,5 +1,5 @@
-const { verifyAccessToken } = require('../../utils/jwt');
-const logger = require('../../main/common/logger');
+const { verifyAccessToken } = require('../utils/jwt');
+const logger = require('../main/common/logger');
 
 const authenticate = (req, res, next) => {
   try {

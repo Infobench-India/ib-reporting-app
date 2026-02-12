@@ -11,13 +11,13 @@ export default defineConfig(({ mode }: { mode: string }): UserConfig => {
         name: "analytics_web_app", // Name of the remote module
         filename: "analytics_web_app.js", // Output filename for the federation
         exposes: {
-          "./App": "./src/App.tsx", 
+          "./App": "./src/App.tsx",
         },
-        shared: ['react', 'react-dom', 'react-redux', 'react-router-dom',  'recharts'],
+        shared: ['react', 'react-dom', 'react-redux', 'react-router-dom', 'recharts'],
       }),
     ],
     build: {
-      modulePreload:false,
+      modulePreload: false,
       target: "esnext",
       minify: false,
       cssCodeSplit: false,

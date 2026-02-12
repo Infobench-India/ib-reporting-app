@@ -4,6 +4,7 @@ const AuthController = require('../api/controllers/AuthController');
 const RoleController = require('../api/controllers/RoleController');
 const PermissionController = require('../api/controllers/PermissionController');
 const UserController = require('../api/controllers/UserController');
+const SystemConfigController = require('../api/controllers/SystemConfigController');
 const { authenticate, authorize, authorizeRoles } = require('../middleware/auth');
 
 // Auth routes
@@ -21,6 +22,7 @@ router.get('/roles/:roleId', authenticate, RoleController.getRoleById);
 router.post('/roles', authenticate, authorizeRoles(['Admin']), RoleController.createRole);
 router.post('/roles/assign-permission', authenticate, authorizeRoles(['Admin']), RoleController.assignPermission);
 router.post('/roles/remove-permission', authenticate, authorizeRoles(['Admin']), RoleController.removePermission);
+router.put('/roles/:roleId', authenticate, authorizeRoles(['Admin']), RoleController.updateRole);
 
 // Permission routes (protected)
 router.get('/permissions', authenticate, PermissionController.getAllPermissions);
@@ -30,6 +32,13 @@ router.post('/permissions', authenticate, authorizeRoles(['Admin']), PermissionC
 // User routes (admin)
 router.get('/users', authenticate, authorizeRoles(['Admin']), UserController.listUsers);
 router.put('/users/:id/role', authenticate, authorizeRoles(['Admin']), UserController.updateRole);
+router.put('/users/:id', authenticate, authorizeRoles(['Admin']), UserController.updateUser);
 router.get('/users/:id', authenticate, authorizeRoles(['Admin']), UserController.getUser);
+
+// System Config routes
+router.get('/systemconfigs', authenticate, SystemConfigController.findAll);
+router.put('/systemconfigs/:id', authenticate, authorizeRoles(['Admin']), SystemConfigController.update);
+router.post('/systemconfigs', authenticate, authorizeRoles(['Admin']), SystemConfigController.update);
+router.delete('/systemconfigs/:id', authenticate, authorizeRoles(['Admin']), SystemConfigController.delete);
 
 module.exports = router;

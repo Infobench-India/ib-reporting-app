@@ -127,7 +127,7 @@ class UserService {
     const pool = await getPool();
 
     try {
-      const allowedFields = ['firstName', 'lastName', 'email'];
+      const allowedFields = ['firstName', 'lastName', 'email', 'isActive', 'roleId'];
       const setClauses = [];
       const request = pool.request();
       request.input('userId', userId);
@@ -141,7 +141,7 @@ class UserService {
 
       if (setClauses.length === 0) return;
 
-      const query = `UPDATE Users SET ${setClauses.join(', ')} WHERE id = @userId;`;
+      const query = `UPDATE Users SET ${setClauses.join(', ')}, updatedAt = GETDATE() WHERE id = @userId;`;
       await request.query(query);
 
       logger.info(`User updated: ${userId}`);
@@ -160,7 +160,7 @@ class UserService {
         FROM Users u
         LEFT JOIN Roles r ON u.roleId = r.id
         ORDER BY u.email;
-      `;
+`;
 
       const result = await pool.request().query(query);
       return result.recordset || [];
@@ -174,9 +174,9 @@ class UserService {
     const pool = await getPool();
 
     try {
-      const query = `UPDATE Users SET roleId = @roleId, updatedAt = GETDATE() WHERE id = @userId;`;
+      const query = `UPDATE Users SET roleId = @roleId, updatedAt = GETDATE() WHERE id = @userId; `;
       await pool.request().input('roleId', roleId).input('userId', userId).query(query);
-      logger.info(`Updated role for user ${userId} -> ${roleId}`);
+      logger.info(`Updated role for user ${userId} -> ${roleId} `);
     } catch (err) {
       logger.error('Update user role failed:', err);
       throw err;
@@ -187,9 +187,9 @@ class UserService {
     const pool = await getPool();
     try {
       const query = `
-        INSERT INTO PasswordResets (id, userId, token, expiresAt, createdAt)
-        VALUES (@id, @userId, @token, @expiresAt, GETDATE());
-      `;
+        INSERT INTO PasswordResets(id, userId, token, expiresAt, createdAt)
+VALUES(@id, @userId, @token, @expiresAt, GETDATE());
+`;
       const request = pool.request();
       request.input('id', uuidv4());
       request.input('userId', userId);
@@ -208,7 +208,7 @@ class UserService {
       const query = `
         SELECT userId FROM PasswordResets 
         WHERE token = @token AND expiresAt > GETDATE() AND usedAt IS NULL;
-      `;
+`;
       const result = await pool.request().input('token', token).query(query);
       return result.recordset[0]?.userId || null;
     } catch (err) {
@@ -220,7 +220,7 @@ class UserService {
   static async updatePassword(userId, passwordHash) {
     const pool = await getPool();
     try {
-      const query = `UPDATE Users SET passwordHash = @passwordHash, updatedAt = GETDATE() WHERE id = @userId;`;
+      const query = `UPDATE Users SET passwordHash = @passwordHash, updatedAt = GETDATE() WHERE id = @userId; `;
       await pool.request().input('passwordHash', passwordHash).input('userId', userId).query(query);
     } catch (err) {
       logger.error('Update password failed:', err);
@@ -231,7 +231,7 @@ class UserService {
   static async invalidateResetToken(token) {
     const pool = await getPool();
     try {
-      const query = `UPDATE PasswordResets SET usedAt = GETDATE() WHERE token = @token;`;
+      const query = `UPDATE PasswordResets SET usedAt = GETDATE() WHERE token = @token; `;
       await pool.request().input('token', token).query(query);
     } catch (err) {
       logger.error('Invalidate reset token failed:', err);

@@ -33,7 +33,7 @@ export interface TokenPayload {
 class AuthServiceImpl {
   private axiosInstance: AxiosInstance;
   private accessToken: string | null = null;
-  private refreshToken: string | null = null;
+  private refreshToken: string | null | undefined = null;
   private user: User | null = null;
 
   constructor() {
@@ -104,11 +104,11 @@ class AuthServiceImpl {
     );
   }
 
-  private setTokens(accessToken: string, refreshToken: string) {
+  private setTokens(accessToken: string, refreshToken: string | null | undefined) {
     this.accessToken = accessToken;
     this.refreshToken = refreshToken;
     localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
+    localStorage.setItem('refreshToken', refreshToken || '');
   }
 
   private setUser(user: User) {
@@ -215,7 +215,7 @@ class AuthServiceImpl {
     return this.accessToken;
   }
 
-  getRefreshToken(): string | null {
+  getRefreshToken(): string | null | undefined {
     return this.refreshToken;
   }
 

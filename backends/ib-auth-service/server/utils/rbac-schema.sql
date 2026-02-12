@@ -152,3 +152,18 @@ BEGIN
     );
     CREATE INDEX IX_PasswordResets_Token ON PasswordResets(token);
 END;
+
+-- System configurations table
+IF OBJECT_ID('SystemConfigs', 'U') IS NULL
+BEGIN
+    CREATE TABLE SystemConfigs (
+        id NVARCHAR(36) PRIMARY KEY,
+        [key] NVARCHAR(255) NOT NULL UNIQUE,
+        [value] NVARCHAR(MAX) NOT NULL,
+        description NVARCHAR(500),
+        createdAt DATETIME DEFAULT GETDATE(),
+        updatedAt DATETIME DEFAULT GETDATE(),
+        CONSTRAINT CK_SystemConfigs_Value_IsJSON CHECK (ISJSON([value]) > 0)
+    );
+    CREATE INDEX IDX_SystemConfigs_Key ON SystemConfigs([key]);
+END;

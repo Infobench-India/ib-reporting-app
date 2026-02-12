@@ -138,6 +138,32 @@ class RoleService {
       throw err;
     }
   }
+
+  static async updateRole(roleId, updates) {
+    const pool = await getPool();
+    try {
+      const allowedFields = ['name', 'description', 'isActive'];
+      const setClauses = [];
+      const request = pool.request();
+      request.input('roleId', roleId);
+
+      for (const [key, value] of Object.entries(updates)) {
+        if (allowedFields.includes(key)) {
+          setClauses.push(`${key} = @${key}`);
+          request.input(key, value);
+        }
+      }
+
+      if (setClauses.length === 0) return;
+
+      const query = `UPDATE Roles SET ${setClauses.join(', ')}, updatedAt = GETDATE() WHERE id = @roleId;`;
+      await request.query(query);
+      logger.info(`Role updated: ${roleId}`);
+    } catch (err) {
+      logger.error('Update role failed:', err);
+      throw err;
+    }
+  }
 }
 
 module.exports = RoleService;

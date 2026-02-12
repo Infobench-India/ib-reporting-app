@@ -80,7 +80,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<DashboardHome />} />
         <Route path="/admin" element={user.role === 'Admin' ? <AdminPanel /> : <Navigate to="/" />} />
-        <Route path="/analytics" element={
+        <Route path="/apps/analytics_web_app/*" element={
           <Suspense fallback={
             <div className="text-center py-5">
               <Spinner animation="border" variant="primary" className="mb-2" />

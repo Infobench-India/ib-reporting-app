@@ -39,6 +39,18 @@ class UserController {
       res.status(500).json({ error: 'Failed to fetch user' });
     }
   }
+  static async updateUser(req, res) {
+    try {
+      const userId = req.params.id;
+      const updates = req.body;
+
+      await UserService.updateUser(userId, updates);
+      res.json({ message: 'User updated successfully' });
+    } catch (err) {
+      logger.error('Update user failed:', err);
+      res.status(500).json({ error: 'Failed to update user' });
+    }
+  }
 }
 
 module.exports = UserController;

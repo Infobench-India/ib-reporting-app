@@ -1,6 +1,6 @@
 import type { IRolePolicy, ParameterConfig } from "../types/customTypes";
 
-export let APP_NAME = import.meta.env.VITE_APP_NAME || "apps/analytics_web_app";
+export let APP_NAME = "analytics";
 export let navItems = [
   // {
   //   label: "Dashboard", href: `/${APP_NAME}/dashboard`

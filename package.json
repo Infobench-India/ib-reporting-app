@@ -21,7 +21,20 @@
     "start:container": "npm run dev --workspace=frontends/ib-container-app",
     "start:analytics": "npm run dev --workspace=frontends/ib-analytics-app"
   },
-  "keywords": ["auth", "rbac", "microfrontend", "monorepo"],
+  "keywords": [
+    "auth",
+    "rbac",
+    "microfrontend",
+    "monorepo"
+  ],
+  "overrides": {
+    "@types/react": "18.3.11",
+    "@types/react-dom": "18.3.0"
+  },
+  "resolutions": {
+    "@types/react": "18.3.11",
+    "@types/react-dom": "18.3.0"
+  },
   "author": "",
   "license": "ISC"
 }

@@ -11,3 +11,4 @@ package-lock.json
 yarn.locks
 **/installers
 licensing-tool
+logs

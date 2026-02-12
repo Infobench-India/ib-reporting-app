@@ -8,13 +8,13 @@ export default defineConfig({
     federation({
       name: 'ib_container_app',
       remotes: {
-        // Remote entry for ib-analytics-app (ensure ib-analytics-app exposes a remoteEntry)
-        ib_analytics_app: 'http://localhost:5003/assets/remoteEntry.js'
+        // Remote entry for ib-analytics-app
+        ib_analytics_app: 'http://localhost:5003/assets/analytics_web_app.js'
       },
       exposes: {
         './Auth': './src/auth/index.ts'
       },
-      shared: ['react', 'react-dom']
+      shared: ['react', 'react-dom', 'react-redux', 'react-router-dom']
     })
   ],
   server: {
