@@ -6,7 +6,7 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_AUTH_API_URL || 'http://localhost:3051/api/auth';
 
-export default function ResetPassword({ onBackToLogin }) {
+export default function ResetPassword({ onBackToLogin: any }) {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -21,7 +21,7 @@ export default function ResetPassword({ onBackToLogin }) {
         else setError('Invalid reset link. No token found.');
     }, []);
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: any) => {
         e.preventDefault();
         if (password !== confirmPassword) return setError('Passwords do not match');
         if (password.length < 6) return setError('Password must be at least 6 characters');
@@ -33,7 +33,7 @@ export default function ResetPassword({ onBackToLogin }) {
             await axios.post(`${API_URL}/reset-password`, { token, newPassword: password });
             setSuccess(true);
             toast.success('Password reset successfully!');
-        } catch (err) {
+        } catch (err: any) {
             setError(err.response?.data?.error || 'Failed to reset password. Link may be expired.');
             toast.error('Reset failed');
         } finally {
