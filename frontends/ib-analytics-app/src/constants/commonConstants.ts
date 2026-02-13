@@ -1,22 +1,23 @@
+import { Label } from "recharts";
 import type { IRolePolicy, ParameterConfig } from "../types/customTypes";
 
 export let APP_NAME = "analytics";
 export const getNavItems = (baseUrl: string) => [
   {
-    label: "Add Schedule Configs",
-    href: `${baseUrl}/scheduleconfigs`
+    label: "Home",
+    href: `${baseUrl}/`
   },
   {
-    label: "Add Shift Configs",
-    href: `${baseUrl}/shiftconfigs`
+    label: "Report Config",
+    href: `${baseUrl}/sqlreportconfigs`
   },
   {
-    label: "Event Logs",
-    href: `${baseUrl}/eventlogs`
+    label: "Sql Report Schedule",
+    href: `${baseUrl}/sqlreportschedule`
   },
   {
-    label: "Report History",
-    href: `${baseUrl}/reporthistory`
+    label: "Sql Report History",
+    href: `${baseUrl}/sqlreporthistory`
   }
 ];
 

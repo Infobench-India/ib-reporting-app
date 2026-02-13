@@ -8,12 +8,20 @@ export default defineConfig(({ mode }: { mode: string }): UserConfig => {
     plugins: [
       react(),
       federation({
-        name: "analytics_web_app", // Name of the remote module
-        filename: "analytics_web_app.js", // Output filename for the federation
+        name: "analytics_web_app",
+        filename: "analytics_web_app.js",
         exposes: {
           "./App": "./src/App.tsx",
         },
-        shared: ['react', 'react-dom', 'react-redux', 'react-router-dom', 'recharts'],
+        shared: [
+          'react',
+          'react-dom',
+          'react-redux',
+          'react-router-dom',
+          '@react-pdf-viewer/core',
+          '@react-pdf-viewer/default-layout',
+          'recharts'
+        ],
       }),
     ],
     build: {
@@ -29,6 +37,18 @@ export default defineConfig(({ mode }: { mode: string }): UserConfig => {
             declaration: true,
             outDir: "dist/types",
           }),
+          {
+            name: "copy-pdf-worker",
+            generateBundle() {
+              this.emitFile({
+                type: "asset",
+                fileName: "pdf.worker.min.js",
+                source: require("fs").readFileSync(
+                  require.resolve("pdfjs-dist/build/pdf.worker.min.js")
+                ),
+              });
+            },
+          },
         ],
       },
     },

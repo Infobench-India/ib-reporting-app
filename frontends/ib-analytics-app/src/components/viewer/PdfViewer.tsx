@@ -11,11 +11,13 @@ interface PdfViewerProps {
 }
 
 const PdfViewer: React.FC<PdfViewerProps> = ({ fileUrl }) => {
+    // Construct the worker URL to point to the analytics app's origin
+    const workerUrl = new URL('/pdf.worker.min.js', 'http://192.168.2.20:5003').toString();
     const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
     return (
         <div style={{ height: '750px' }}>
-            <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
+            <Worker workerUrl={workerUrl}>
                 <Viewer
                     fileUrl={fileUrl}
                     plugins={[defaultLayoutPluginInstance]}

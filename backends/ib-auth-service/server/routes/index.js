@@ -28,6 +28,7 @@ router.put('/roles/:roleId', authenticate, authorizeRoles(['Admin']), RoleContro
 router.get('/permissions', authenticate, PermissionController.getAllPermissions);
 router.get('/permissions/:permissionId', authenticate, PermissionController.getPermissionById);
 router.post('/permissions', authenticate, authorizeRoles(['Admin']), PermissionController.createPermission);
+router.put('/permissions/:permissionId', authenticate, authorizeRoles(['Admin']), PermissionController.updatePermission);
 
 // User routes (admin)
 router.get('/users', authenticate, authorizeRoles(['Admin']), UserController.listUsers);

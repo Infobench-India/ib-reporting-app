@@ -60,6 +60,10 @@ const schedulerService = {
     resendReport: async (historyId: number) => {
         const res = await SQL_API.post(`${API_BASE}/history/${historyId}/resend`);
         return res.data;
+    },
+    getExecutionHistoryFile: async (historyId: number) => {
+        const res = await SQL_API.get(`${API_BASE}/history/${historyId}/download`, { responseType: 'blob' });
+        return res.data;
     }
 };
 

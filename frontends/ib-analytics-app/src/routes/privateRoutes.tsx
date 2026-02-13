@@ -35,8 +35,8 @@ const PrivateRoutes: React.FC<PrivateRoutesProps> = ({ baseUrl }) => {
           <Route path="eventlogs" element={<EventsList />} />
           <Route path="reporthistory" element={<ReportHistoryPage />} />
           <Route path="docviewer" element={<DocumentViewerPage />} />
-          <Route path="reportconfigs" element={<ReportConfigPage />} />
-          <Route path="sqlreportview" element={<SQLReportViewPage />} />
+          <Route path="sqlreportconfigs" element={<ReportConfigPage />} />
+          <Route path="/" element={<SQLReportViewPage />} />
           <Route path="sqlreportschedule" element={<SQLSchedulePage />} />
           <Route path="sqlreporthistory" element={<SQLHistoryPage />} />
         </Route>

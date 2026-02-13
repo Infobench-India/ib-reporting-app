@@ -43,6 +43,19 @@ class PermissionController {
       res.status(500).json({ error: 'Failed to create permission' });
     }
   }
+
+  static async updatePermission(req, res) {
+    try {
+      const { permissionId } = req.params;
+      const updates = req.body;
+
+      await PermissionService.updatePermission(permissionId, updates);
+      res.json({ message: 'Permission updated successfully' });
+    } catch (err) {
+      logger.error('Update permission failed:', err);
+      res.status(500).json({ error: 'Failed to update permission' });
+    }
+  }
 }
 
 module.exports = PermissionController;

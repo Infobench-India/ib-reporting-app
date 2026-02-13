@@ -14,6 +14,11 @@ API.interceptors.request.use((config) => {
     let accessToken = localStorage.getItem('accessToken');
     if (!accessToken && (window as any).__HOST_STORE__) {
       accessToken = (window as any).__HOST_STORE__.getState().auth.accessToken;
+      console.log('[API] Token from host store:', accessToken ? 'found' : 'not found');
+    } else if (accessToken) {
+      console.log('[API] Token from localStorage:', 'found');
+    } else {
+      console.log('[API] No token found');
     }
 
     if (accessToken) {

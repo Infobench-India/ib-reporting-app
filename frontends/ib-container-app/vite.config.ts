@@ -14,7 +14,15 @@ export default defineConfig({
       exposes: {
         './Auth': './src/auth/index.ts'
       },
-      shared: ['react', 'react-dom', 'react-redux', 'react-router-dom']
+      shared: [
+        'react',
+        'react-dom',
+        'react-redux',
+        'react-router-dom',
+        '@react-pdf-viewer/core',
+        '@react-pdf-viewer/default-layout',
+        'recharts'
+      ]
     })
   ],
   server: {

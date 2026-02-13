@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Table, Button, Badge, Pagination } from "react-bootstrap";
+import { Table, Button, Badge, Pagination, Modal } from "react-bootstrap";
 import { useAppDispatch, useAppSelector, RootState } from "../../store";
 import SQLSchedulerService from "../../redux/features/apis/SQLSchedulerAPI";
 import schedulerService, { ExecutionHistory as IExecutionHistory } from "../../services/schedulerService";
+import PdfViewer from "../viewer/PdfViewer";
 
 interface Props {
     scheduleId?: number;
@@ -16,6 +17,9 @@ const ExecutionHistory: React.FC<Props> = ({ scheduleId }) => {
 
     const [currentPage, setCurrentPage] = useState(page);
     const [limit] = useState(10);
+    const [showPreview, setShowPreview] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState<string>("");
+    const [previewFileName, setPreviewFileName] = useState<string>("");
 
     useEffect(() => {
         dispatch(SQLSchedulerService.getHistory({ scheduleId, page: currentPage, limit }));
@@ -30,6 +34,30 @@ const ExecutionHistory: React.FC<Props> = ({ scheduleId }) => {
             schedulerService.downloadAttachment(h.id, h.fileName);
         }
     };
+
+    const handlePreview = async (h: IExecutionHistory) => {
+        if (h.id && h.fileName) {
+            try {
+                const blob = await schedulerService.getExecutionHistoryFile(h.id);
+                // Create object URL from blob
+                const url = window.URL.createObjectURL(new Blob([blob]));
+                setPreviewUrl(url);
+                setPreviewFileName(h.fileName);
+                setShowPreview(true);
+            } catch (error) {
+                console.error("Failed to load preview:", error);
+                alert("Failed to load document preview");
+            }
+        }
+    };
+
+    // Clean up object URL when modal closes or unmounts
+    useEffect(() => {
+        if (!showPreview && previewUrl) {
+            window.URL.revokeObjectURL(previewUrl);
+            setPreviewUrl("");
+        }
+    }, [showPreview, previewUrl]);
 
     const handleResend = async (id: number) => {
         if (window.confirm("Are you sure you want to resend this report?")) {
@@ -81,6 +109,7 @@ const ExecutionHistory: React.FC<Props> = ({ scheduleId }) => {
                                     <div className="d-flex gap-2">
                                         {h.status === 'Success' && (
                                             <>
+                                                <Button size="sm" variant="link" onClick={() => handlePreview(h)}>Preview</Button>
                                                 <Button size="sm" variant="link" onClick={() => handleDownload(h)}>Download</Button>
                                                 <Button size="sm" variant="link" onClick={() => handleResend(h.id)}>Resend</Button>
                                             </>
@@ -112,6 +141,15 @@ const ExecutionHistory: React.FC<Props> = ({ scheduleId }) => {
                     </Pagination>
                 </div>
             )}
+
+            <Modal show={showPreview} onHide={() => setShowPreview(false)} size="xl" centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>PDF Preview - {previewFileName}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body style={{ height: '80vh', overflow: 'auto' }}>
+                    {previewUrl && <PdfViewer fileUrl={previewUrl} />}
+                </Modal.Body>
+            </Modal>
         </div>
     );
 };

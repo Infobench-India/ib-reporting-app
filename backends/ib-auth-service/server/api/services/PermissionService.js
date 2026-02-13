@@ -69,6 +69,32 @@ class PermissionService {
       throw err;
     }
   }
+
+  static async updatePermission(permissionId, updates) {
+    const pool = await getPool();
+    try {
+      const allowedFields = ['name', 'description', 'action', 'resource', 'isActive'];
+      const setClauses = [];
+      const request = pool.request();
+      request.input('permissionId', permissionId);
+
+      for (const [key, value] of Object.entries(updates)) {
+        if (allowedFields.includes(key)) {
+          setClauses.push(`${key} = @${key}`);
+          request.input(key, value);
+        }
+      }
+
+      if (setClauses.length === 0) return;
+
+      const query = `UPDATE Permissions SET ${setClauses.join(', ')}, updatedAt = GETDATE() WHERE id = @permissionId;`;
+      await request.query(query);
+      logger.info(`Permission updated: ${permissionId}`);
+    } catch (err) {
+      logger.error('Update permission failed:', err);
+      throw err;
+    }
+  }
 }
 
 module.exports = PermissionService;

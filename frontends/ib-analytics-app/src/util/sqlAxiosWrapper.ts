@@ -18,6 +18,11 @@ SQL_API.interceptors.request.use((config) => {
         let accessToken = localStorage.getItem('accessToken');
         if (!accessToken && (window as any).__HOST_STORE__) {
             accessToken = (window as any).__HOST_STORE__.getState().auth.accessToken;
+            console.log('[SQL_API] Token from host store:', accessToken ? 'found' : 'not found');
+        } else if (accessToken) {
+            console.log('[SQL_API] Token from localStorage:', 'found');
+        } else {
+            console.log('[SQL_API] No token found');
         }
 
         if (accessToken) {

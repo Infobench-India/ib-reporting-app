@@ -65,7 +65,14 @@ const getPool = async (connString = null) => {
         const newPool = await new sql.ConnectionPool({
             server: server,
             database: database,
-            options: { trustedConnection: true, encrypt: false }
+            options: {
+                trustedConnection: true,
+                encrypt: false,
+                requestTimeout: 60000, // 60 seconds
+                connectionTimeout: 60000 // 60 seconds
+            },
+            requestTimeout: 60000, // Also set at pool level for good measure
+            connectionTimeout: 60000
         }).connect();
 
         if (!connString) {
