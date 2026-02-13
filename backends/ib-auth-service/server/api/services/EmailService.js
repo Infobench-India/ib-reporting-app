@@ -1,5 +1,6 @@
-const nodemailer = require('nodemailer');
-const logger = require('../main/common/logger');
+
+const logger = require('../../main/common/logger');
+const { sendEmail } = require('./sendEmailService');
 
 class EmailService {
     static async sendPasswordResetEmail(email, token) {
@@ -16,24 +17,12 @@ class EmailService {
         }
 
         try {
-            // Placeholder for real SMTP configuration
-            // let transporter = nodemailer.createTransport({
-            //     host: process.env.SMTP_HOST,
-            //     port: process.env.SMTP_PORT,
-            //     secure: false,
-            //     auth: {
-            //         user: process.env.SMTP_USER,
-            //         pass: process.env.SMTP_PASS
-            //     }
-            // });
-
-            // await transporter.sendMail({
-            //     from: '"Reporting App" <noreply@example.com>',
-            //     to: email,
-            //     subject: "Password Reset Request",
-            //     text: `You requested a password reset. Please click the following link to reset your password: ${resetUrl}`,
-            //     html: `<b>You requested a password reset</b><p>Please click the following link to reset your password: <a href="${resetUrl}">${resetUrl}</a></p>`
-            // });
+            await sendEmail({
+                to: email,
+                subject: "Password Reset Request",
+                text: `You requested a password reset. Please click the following link to reset your password: ${resetUrl}`,
+                html: `<b>You requested a password reset</b><p>Please click the following link to reset your password: <a href="${resetUrl}">${resetUrl}</a></p>`
+            })
 
             return true;
         } catch (error) {

@@ -188,13 +188,13 @@ class UserService {
     try {
       const query = `
         INSERT INTO PasswordResets(id, userId, token, expiresAt, createdAt)
-VALUES(@id, @userId, @token, @expiresAt, GETDATE());
-`;
+        VALUES(@id, @userId, @token, DATEADD(hour, 1, GETDATE()), GETDATE());
+      `;
       const request = pool.request();
       request.input('id', uuidv4());
       request.input('userId', userId);
       request.input('token', token);
-      request.input('expiresAt', expiresAt);
+      // expiresAt passed from controller is ignored in favor of DB time to ensure consistency
       await request.query(query);
     } catch (err) {
       logger.error('Save reset token failed:', err);
@@ -208,7 +208,7 @@ VALUES(@id, @userId, @token, @expiresAt, GETDATE());
       const query = `
         SELECT userId FROM PasswordResets 
         WHERE token = @token AND expiresAt > GETDATE() AND usedAt IS NULL;
-`;
+      `;
       const result = await pool.request().input('token', token).query(query);
       return result.recordset[0]?.userId || null;
     } catch (err) {

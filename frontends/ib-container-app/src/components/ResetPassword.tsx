@@ -29,6 +29,7 @@ export default function ResetPassword({ onBackToLogin }) {
         setLoading(true);
         setError('');
         try {
+            console.log('Sending reset password request:', { token, newPassword: password });
             await axios.post(`${API_URL}/reset-password`, { token, newPassword: password });
             setSuccess(true);
             toast.success('Password reset successfully!');

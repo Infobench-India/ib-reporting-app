@@ -215,10 +215,14 @@ class AuthController {
   static async resetPassword(req, res) {
     try {
       const { token, newPassword } = req.body;
-      if (!token || !newPassword) return res.status(400).json({ error: 'Token and newPassword are required' });
+      if (!token || !newPassword) {
+        logger.warn('ResetPassword failed: Missing token or newPassword');
+        return res.status(400).json({ error: 'Token and newPassword are required' });
+      }
 
       const userId = await UserService.verifyResetToken(token);
       if (!userId) {
+        logger.warn(`ResetPassword failed: Invalid or expired token: ${token}`);
         return res.status(400).json({ error: 'Invalid or expired token' });
       }
 
