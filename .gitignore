@@ -10,5 +10,12 @@ dist
 package-lock.json
 yarn.locks
 **/installers
-licensing-tool
+application-activation-tool
 logs
+.vs
+publish
+PublishOutput
+Output
+bin
+obj
+
