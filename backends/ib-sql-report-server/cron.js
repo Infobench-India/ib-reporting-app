@@ -8,4 +8,15 @@ if (envMode === 'production') {
 }
 // Initialize Scheduler
 const { initScheduler } = require('./server/api/services/schedulerService');
-initScheduler();
+const { checkActivation } = require('./server/utils/activationCheck');
+
+async function start() {
+  const status = await checkActivation();
+  if (!status.activated) {
+    console.error('Server not activated, scheduler will not start:', status.reason || status.error);
+    process.exit(1);
+  }
+  initScheduler();
+}
+
+start();

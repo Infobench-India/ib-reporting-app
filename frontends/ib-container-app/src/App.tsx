@@ -2,6 +2,7 @@ import React, { Suspense, useState, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
+import Activation from './pages/Activation';
 import Login from './components/Login';
 import Register from './components/Register';
 import ForgotPassword from './components/ForgotPassword';
@@ -47,6 +48,21 @@ const DashboardHome = () => (
 export default function App() {
   const { user, loading } = useAuth();
   const [view, setView] = useState('login'); // login, register, forgot, reset
+  const navigateRef = React.useRef<any>(null);
+  useEffect(() => {
+    // check activation status on app start; redirect to /activation if not activated
+    (async () => {
+      try {
+        const res = await fetch('/api/auth/activation/status', { credentials: 'include' });
+        if (res.status === 403) {
+          // if user not on auth pages, navigate to activation
+          window.location.pathname !== '/activation' && (window.location.pathname = '/activation');
+        }
+      } catch (err) {
+        // ignore network errors here
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -78,6 +94,7 @@ export default function App() {
     <Layout>
       <Toaster position="top-right" />
       <Routes>
+        <Route path="/activation" element={<Activation />} />
         <Route path="/" element={<DashboardHome />} />
         <Route path="/admin" element={user.role === 'Admin' ? <AdminPanel /> : <Navigate to="/" />} />
         <Route path="/apps/analytics_web_app/*" element={

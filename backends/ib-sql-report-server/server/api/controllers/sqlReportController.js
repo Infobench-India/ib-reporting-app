@@ -60,7 +60,7 @@ exports.executeReport = async (req, res) => {
         const countQuery = `SELECT COUNT(*) as total ${countBase}`;
 
         const dataPool = await getPool(config.connectionString);
-        console.log("@@@@@@@@@@@@@@", query, config.connectionString)
+        console.log("SQL Query and Connection", query, config.connectionString)
         const [result, countResult] = await Promise.all([
             dataPool.request().query(paginatedQuery),
             dataPool.request().query(countQuery)

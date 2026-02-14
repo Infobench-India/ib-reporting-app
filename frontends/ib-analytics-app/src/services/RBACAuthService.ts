@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 
-const API_BASE_URL = process.env.VITE_REACT_APP_AUTH_API_URL || 'http://localhost:3051/api/auth';
-const REPORT_API_BASE_URL = process.env.VITE_REACT_APP_REPORT_API_URL || 'http://localhost:3052/api';
+const API_BASE_URL = import.meta.env.VITE_REACT_APP_AUTH_API_URL || 'http://localhost:3051/api/auth';
+const REPORT_API_BASE_URL = import.meta.env.VITE_REACT_APP_REPORT_API_URL || 'http://localhost:3052/api';
 
 export interface User {
   id: string;

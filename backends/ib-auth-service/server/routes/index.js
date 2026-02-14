@@ -6,6 +6,9 @@ const PermissionController = require('../api/controllers/PermissionController');
 const UserController = require('../api/controllers/UserController');
 const SystemConfigController = require('../api/controllers/SystemConfigController');
 const { authenticate, authorize, authorizeRoles } = require('../middleware/auth');
+const ActivationController = require('../api/controllers/ActivationController');
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
 
 // Auth routes
 router.post('/register', AuthController.register);
@@ -41,5 +44,10 @@ router.get('/systemconfigs', authenticate, SystemConfigController.findAll);
 router.put('/systemconfigs/:id', authenticate, authorizeRoles(['Admin']), SystemConfigController.update);
 router.post('/systemconfigs', authenticate, authorizeRoles(['Admin']), SystemConfigController.update);
 router.delete('/systemconfigs/:id', authenticate, authorizeRoles(['Admin']), SystemConfigController.delete);
+
+// Activation routes (unprotected)
+router.get('/activation/machine-id', ActivationController.getMachineId);
+router.post('/activation', upload.single('license'), ActivationController.activate);
+router.get('/activation/status', ActivationController.getStatus);
 
 module.exports = router;

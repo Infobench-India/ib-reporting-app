@@ -6,6 +6,7 @@ const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const logger = require('./server/main/common/logger');
 const config = require('./server/config');
+const activationService = require('./server/services/activationService');
 
 const app = express();
 const PORT = config.port;
@@ -37,6 +38,21 @@ app.use(cookieParser());
 
 // Routes
 app.use('/api/auth', require('./server/routes'));
+
+// Activation status accessible to routes
+try {
+  activationService.loadPublicKey();
+  const activationStatus = activationService.isActivated();
+  app.locals.activation = activationStatus;
+  if (activationStatus.activated) {
+    logger.info('Application activation: activated');
+    logger.info(`Activation payload: ${JSON.stringify(activationStatus.payload)}`);
+  } else {
+    logger.warn(`Application activation: NOT activated (${activationStatus.reason})`);
+  }
+} catch (err) {
+  logger.error('Activation check failed on startup', err);
+}
 
 // Health check endpoint
 app.get('/health', (req, res) => {
