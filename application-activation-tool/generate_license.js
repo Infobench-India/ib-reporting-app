@@ -1,7 +1,15 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
-
+const features = {
+  autoEmail: true,
+  numberOfEmails:5,
+  excelReport: true,
+  pdfReport: true,
+  numberOfReports:5,
+  numberOfChartsPerReport:5,
+  scheduler: true,
+}
 function usage() {
   console.log('Usage: node generate_license.js --machineId <id> --key <private.pem> [--out activation.lic] [--expires YYYY-MM-DDTHH:MM:SSZ]');
   process.exit(1);
@@ -38,6 +46,7 @@ const privateKey = fs.readFileSync(keyPath, 'utf8');
 const payload = {
   machineId,
   expiresAt: expires || null,
+  features,
   issuedAt: new Date().toISOString()
 };
 

@@ -219,18 +219,18 @@ const ensureTables = async (ConnectionString) => {
             IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ReportSchedules')
             BEGIN
                 CREATE TABLE ReportSchedules (
-                    id INT PRIMARY KEY IDENTITY(1,1),
-                    reportId INT FOREIGN KEY REFERENCES ReportConfigs(id) ON DELETE CASCADE,
-                    name NVARCHAR(255) NOT NULL,
-                    startDateTime DATETIME NOT NULL,
-                    endDateTime DATETIME NOT NULL,
-                    scheduleTime NVARCHAR(50) NOT NULL, -- "HH:mm"
-                    recipients NVARCHAR(MAX) NOT NULL, -- Comma-separated emails
-                    status NVARCHAR(50) DEFAULT 'Active', -- 'Active', 'Inactive'
-                    nextExecution DATETIME,
-                    createdAt DATETIME DEFAULT GETDATE(),
-                    updatedAt DATETIME DEFAULT GETDATE()
-                );
+    id INT PRIMARY KEY IDENTITY(1,1),
+    reportId INT FOREIGN KEY REFERENCES ReportConfigs(id) ON DELETE CASCADE UNIQUE,
+    name NVARCHAR(255) NOT NULL,
+    startDateTime DATETIME NOT NULL,
+    endDateTime DATETIME NOT NULL,
+    scheduleTime NVARCHAR(50) NOT NULL, -- "HH:mm"
+    recipients NVARCHAR(MAX) NOT NULL, -- Comma-separated emails
+    status NVARCHAR(50) DEFAULT 'Active', -- 'Active', 'Inactive'
+    nextExecution DATETIME,
+    createdAt DATETIME DEFAULT GETDATE(),
+    updatedAt DATETIME DEFAULT GETDATE()
+);
             END
 
             IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ReportScheduleHistory')
