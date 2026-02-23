@@ -2,25 +2,18 @@
   "name": "ib-sql-report-server",
   "version": "1.0.0",
   "description": "Service for executing SQL based reports",
-  "bin": "server.js",
-  "main": "server.js",
+  "bin": "src/server.js",
+  "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "set NODE_ENV=production && node server.js",
-    "dev": "set NODE_ENV=development && nodemon server.js",
-    "dev-cron": "set NODE_ENV=development && nodemon cron.js",
-    "build": "npm run build:server && npm run build:cron",
-    "build:server": "pkg server.js --config package.json --targets node18-win-x64 --output ../../deploy/backends/ib-sql-report-server/dist/server.exe",
-    "build:cron": "pkg cron.js  --config package.json --targets node18-win-x64 --output ../../deploy/backends/ib-sql-report-server/dist/cron.exe"
+    "start": "set NODE_ENV=production && node src/server.js",
+    "dev": "set NODE_ENV=development && nodemon src/server.js",
+    "build": "pkg . --output dist\\ib-sql-report-server.exe --targets node18-win-x64 --compress GZip --bytecode",
+    "release": "npm run build && xcopy dist\\ib-sql-report-server.exe ..\\..\\deploy\\backends\\ib-sql-report-server\\ /Y && \"C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe\" ..\\..\\deploy\\backends\\ib-sql-report-server\\installer.iss",
+    "copy:deploy": "xcopy dist\\ib-sql-report-server.exe \"C:\\Program Files (x86)\\InfobenchSQLReportService\" /E /I /Y"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "pkg": {
-    "assets": [
-      ".env"
-    ]
-  },
   "dependencies": {
     "axios": "^1.13.4",
     "body-parser": "^1.17.2",
@@ -31,7 +24,6 @@
     "express": "^4.15.4",
     "jsonwebtoken": "^9.0.2",
     "moment-timezone": "^0.6.0",
-    "msnodesqlv8": "^4.2.1",
     "mssql": "^10.0.1",
     "node-cron": "^4.2.1",
     "nodemailer": "^6.10.0",
@@ -39,7 +31,17 @@
     "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
+    "javascript-obfuscator": "^5.3.0",
     "nodemon": "^3.1.10",
     "pkg": "^5.8.1"
+  },
+  "pkg": {
+    "assets": [
+      ".env.production",
+      "node_modules/tedious/**/*"
+    ],
+    "scripts": [
+      "src/**/*.js"
+    ]
   }
 }

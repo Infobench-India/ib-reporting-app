@@ -6,7 +6,7 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_AUTH_API_URL || 'http://localhost:3051/api/auth';
 
-export default function Register({ onToggleLogin }) {
+export default function Register({ onToggleLogin }: { onToggleLogin: () => void }) {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -16,11 +16,11 @@ export default function Register({ onToggleLogin }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
+  const handleChange = (e: any) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     if (!formData.email || !formData.password || !formData.firstName) {
       return setError('Please fill in all required fields');
@@ -32,7 +32,7 @@ export default function Register({ onToggleLogin }) {
       await axios.post(`${API_URL}/register`, formData);
       toast.success('Registration successful! Please login.');
       onToggleLogin();
-    } catch (err) {
+    } catch (err: any) {
       setError(err.response?.data?.error || 'Registration failed. Please try again.');
       toast.error('Registration failed');
     } finally {

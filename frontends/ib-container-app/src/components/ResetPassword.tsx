@@ -6,7 +6,7 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_AUTH_API_URL || 'http://localhost:3051/api/auth';
 
-export default function ResetPassword({ onBackToLogin: any }) {
+export default function ResetPassword({ onBackToLogin }: { onBackToLogin: () => void }) {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);

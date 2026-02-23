@@ -4,14 +4,14 @@ import { Lock, Mail, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import useAuth from '../hooks/useAuth';
 
-export default function Login({ onToggleRegister, onToggleForgot }) {
+export default function Login({ onToggleRegister, onToggleForgot }: { onToggleRegister: any, onToggleForgot: any }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e:any) => {
     e.preventDefault();
     if (!email || !password) return setError('Please fill in all fields');
 
@@ -20,7 +20,7 @@ export default function Login({ onToggleRegister, onToggleForgot }) {
     try {
       await login(email, password);
       toast.success('Login successful!');
-    } catch (err) {
+    } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to login. Please check your credentials.');
       toast.error('Login failed');
     } finally {

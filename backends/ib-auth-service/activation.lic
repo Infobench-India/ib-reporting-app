@@ -1,4 +1,4 @@
 {
-  "data": "{\"machineId\":\"fae81f43-4818-4c21-8a94-7ac886e2a660\",\"expiresAt\":\"2026-02-13T00:00:00Z\",\"issuedAt\":\"2026-02-14T05:48:32.687Z\"}",
-  "signature": "dFjpQSjxoOE3Mk9K4ZyUtlNiAO/vs0yY44Vcp/iS18XWzUL7Xdaf+4B+AUAfIkzpmmRxConQR2WLaA2roM5juZdVRxSOPsVvhL2C0R5VS91NKjSMk+dAoVaICEk0Eqd5EU0ZgHyr4OSPa1pv5obRpNFP4bR7JNboRYUEjM1YIYmVDlLIV3GNZx1GCXm/sZZh4S4vKycAjGmXPD6yM66G3fYEhwmydH7eNXe3Vy4l77YNPamDdFsfmbWGjDF3gm1JJuczYCIZZmxZ3hOHFX5c1/4OzXWDYCWoK338T6GKiqw5SYlVBgPwftEXtO6wWrZoZSNrIF+FloxcRFdQGZSnsg=="
+  "data": "{\"machineId\":\"fae81f43-4818-4c21-8a94-7ac886e2a660\",\"expiresAt\":null,\"features\":{\"autoEmail\":true,\"numberOfEmails\":5,\"excelReport\":true,\"pdfReport\":true,\"numberOfReports\":5,\"numberOfChartsPerReport\":5,\"scheduler\":true},\"issuedAt\":\"2026-02-18T04:00:34.716Z\"}",
+  "signature": "EOJxPgyDr1rKT/iB3ndUXDgqGxX3y01aNEmfIaD0MuhYKECEHuKAVouH33D16Lg6f9OumPy6SWBADHzAqgfceWRXfbgD9Pjm0k+NagiWWO5HbfueZaSIxsL3PTNe86P7VARv+BpRZcsad3NGKa15uQbuoKquIx1fOHaHORZFCzLqFxCOHxa/3TO261easT9QaRBgClSNu6J6OIVJYgR2TPlr1au5xIVwI6MbyAvu+5WFdH332GYstVRF2WuDhTrX2aY4/Mt6Pd9JP/dNkGmXV/jLlOm04Gkwv14ktXwyC8wvP3/P8jFObTj+EMEe0ohV6mhfMZWIvORJ/SLHBtsnmw=="
 }

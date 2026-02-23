@@ -5,13 +5,13 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_AUTH_API_URL || 'http://localhost:3051/api/auth';
 
-export default function ForgotPassword({ onBackToLogin }) {
+export default function ForgotPassword({ onBackToLogin }: { onBackToLogin: () => void }) {
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState('');
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e:any) => {
         e.preventDefault();
         setLoading(true);
         setError('');

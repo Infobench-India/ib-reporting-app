@@ -1,6 +1,6 @@
 import React, { Suspense, useState, useEffect } from 'react';
 import { Toaster } from 'react-hot-toast';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import Activation from './pages/Activation';
 import Login from './components/Login';
@@ -11,7 +11,7 @@ import AdminPanel from './components/AdminPanel';
 import RemoteLoader from './components/RemoteLoader';
 import useAuth from './hooks/useAuth';
 import { Container, Spinner } from 'react-bootstrap';
-
+const API_URL = import.meta.env.VITE_AUTH_API_URL || 'http://localhost:3051/api/auth';
 // Dynamic import for Analytics MFE
 // @ts-ignore
 const AnalyticsApp = React.lazy(() => import('ib_analytics_app/App'));
@@ -49,16 +49,18 @@ export default function App() {
   const { user, loading } = useAuth();
   const [view, setView] = useState('login'); // login, register, forgot, reset
   const navigateRef = React.useRef<any>(null);
+    const navigate = useNavigate();
   useEffect(() => {
     // check activation status on app start; redirect to /activation if not activated
     (async () => {
       try {
-        const res = await fetch('/api/auth/activation/status', { credentials: 'include' });
+        const res = await fetch(`${API_URL}/activation/status`, { credentials: 'include' });
         if (res.status === 403) {
           // if user not on auth pages, navigate to activation
-          window.location.pathname !== '/activation' && (window.location.pathname = '/activation');
+          window.location.pathname !== '/activation' && navigate('/activation');
         }
       } catch (err) {
+        console.error('Activation check failed:', err);
         // ignore network errors here
       }
     })();

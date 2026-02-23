@@ -1,0 +1,10 @@
+{
+  "name": "infobench-ui-container",
+  "version": "0.0.0",
+  "private": true,
+  "main": "serve-ui.js",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {}
+}

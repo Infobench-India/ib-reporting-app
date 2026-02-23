@@ -18,4 +18,7 @@ PublishOutput
 Output
 bin
 obj
+*.exe
+*.lic
+coverage
 
