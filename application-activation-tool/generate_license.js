@@ -2,13 +2,18 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const features = {
+  sql_analytics: true,
+  scheduler: true,
+  audit_logs: true,
+  realtime_monitoring: true,
+  advanced_visuals: true,
+  unlimited_entities: true,
   autoEmail: true,
-  numberOfEmails:5,
+  numberOfEmails: 10,
   excelReport: true,
   pdfReport: true,
-  numberOfReports:5,
-  numberOfChartsPerReport:5,
-  scheduler: true,
+  numberOfReports: 10,
+  numberOfChartsPerReport: 10,
 }
 function usage() {
   console.log('Usage: node generate_license.js --machineId <id> --key <private.pem> [--out activation.lic] [--expires YYYY-MM-DDTHH:MM:SSZ]');

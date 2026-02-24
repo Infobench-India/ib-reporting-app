@@ -11,6 +11,32 @@ exports.createReport = async (req, res) => {
 
         const pool = await getPool(data.connectionString);
         await ensureTables(data.connectionString);
+
+        // --- License Limits Check ---
+        const license = req.license || {};
+        const features = license.features || {};
+
+        // 1. Max Reports Check
+        if (features.numberOfReports) {
+            const countResult = await pool.request().query('SELECT COUNT(*) as count FROM ReportConfigs');
+            const currentCount = countResult.recordset[0].count;
+            if (currentCount >= features.numberOfReports) {
+                return res.status(403).json({
+                    success: false,
+                    errors: [`License Limit Exceeded: You have reached the maximum allowed reports (${features.numberOfReports}). Please upgrade your license.`]
+                });
+            }
+        }
+
+        // 2. Max Charts Per Report Check
+        if (features.numberOfChartsPerReport && data.charts && data.charts.length > features.numberOfChartsPerReport) {
+            return res.status(403).json({
+                success: false,
+                errors: [`License Limit Exceeded: Maximum allowed charts per report is ${features.numberOfChartsPerReport}. Your configuration has ${data.charts.length}.`]
+            });
+        }
+        // ----------------------------
+
         const result = await pool.request()
             .input('category', sql.NVarChar, data.category)
             .input('name', sql.NVarChar, data.name)
@@ -177,6 +203,18 @@ exports.updateReport = async (req, res) => {
         const pool = await getPool();
         const data = req.body;
         const id = req.params.id;
+
+        // --- License Limits Check ---
+        const license = req.license || {};
+        const features = license.features || {};
+
+        if (features.numberOfChartsPerReport && data.charts && data.charts.length > features.numberOfChartsPerReport) {
+            return res.status(403).json({
+                success: false,
+                errors: [`License Limit Exceeded: Maximum allowed charts per report is ${features.numberOfChartsPerReport}. Your configuration has ${data.charts.length}.`]
+            });
+        }
+        // ----------------------------
 
         await pool.request()
             .input('id', sql.Int, id)
@@ -493,6 +531,50 @@ exports.importJson = async (req, res) => {
         return res.json({ success: true, message: 'Configuration imported successfully' });
     } catch (error) {
         logger.error('Error in bulk import:', error);
+        return res.status(500).json({ success: false, errors: [error.message] });
+    }
+};
+
+/**
+ * TEST CONNECTIVITY
+ */
+exports.testConnection = async (req, res) => {
+    try {
+        const { connectionString } = req.body;
+        if (!connectionString) {
+            return res.status(400).json({ success: false, errors: ['Connection string is required'] });
+        }
+
+        const pool = await getPool(connectionString);
+        // Try a simple query to verify permissions
+        await pool.request().query('SELECT 1 as connected');
+
+        return res.json({ success: true, message: 'Connection successful!' });
+    } catch (error) {
+        logger.error('Test connection failed:', error);
+        return res.status(500).json({ success: false, errors: [error.message] });
+    }
+};
+
+exports.testQuery = async (req, res) => {
+    try {
+        const { connectionString, query } = req.body;
+        if (!connectionString || !query) {
+            return res.status(400).json({ success: false, errors: ['Connection string and query are required'] });
+        }
+
+        const pool = await getPool(connectionString);
+        // Use a subquery or TOP 0 to just test syntax without fetching data if needed, 
+        // but for testing, fetching 1 row is better to verify result set.
+        const result = await pool.request().query(`SELECT TOP 1 * FROM (${query}) AS TestSubquery`);
+
+        return res.json({
+            success: true,
+            message: 'Query is valid!',
+            columns: result.recordset.length > 0 ? Object.keys(result.recordset[0]) : []
+        });
+    } catch (error) {
+        logger.error('Test query failed:', error);
         return res.status(500).json({ success: false, errors: [error.message] });
     }
 };

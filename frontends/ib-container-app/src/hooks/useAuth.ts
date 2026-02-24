@@ -12,6 +12,8 @@ export default function useAuth() {
 
   return {
     ...context,
-    isAuthenticated: !!context.user
+    isAuthenticated: !!context.user,
+    isFeatureEnabled: context.isFeatureEnabled,
+    license: context.license
   };
 }

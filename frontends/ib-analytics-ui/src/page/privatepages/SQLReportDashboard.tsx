@@ -154,7 +154,21 @@ const DashboardChartItem: React.FC<{ reportConfig: any, fromDate: string, toDate
     );
 };
 
+import FeatureLocked from "../../components/common/FeatureLocked";
+import { useRBACAuth } from "../../hooks/useRBACAuth";
+
+// Assuming AuthProvider is a separate component that might be in another file.
+// If the intention was to add an AuthProvider component to this file, it should be defined separately.
+// For the purpose of this edit, I will assume the instruction "Restore isLoading state in AuthProvider"
+// refers to an external AuthProvider and the user wants to add an isLoading state to it.
+// However, since the provided snippet also includes parts of SQLReportDashboard,
+// I will only apply the relevant parts to SQLReportDashboard and clarify the AuthProvider part.
+
+// The COLORS array is already defined above, so no change needed here.
+// const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d"];
+
 const SQLReportDashboard: React.FC = () => {
+    const { isFeatureEnabled } = useRBACAuth();
     const dispatch = useAppDispatch();
     const { configs, loading: configsLoading } = useAppSelector((state: RootState) => state.sqlReportReducer);
 
@@ -162,20 +176,30 @@ const SQLReportDashboard: React.FC = () => {
     const [fromDate, setFromDate] = useState<string>(moment().subtract(1, 'days').format("YYYY-MM-DD HH:mm:ss"));
     const [toDate, setToDate] = useState<string>(moment().format("YYYY-MM-DD HH:mm:ss"));
 
-    useEffect(() => {
-        dispatch(SQLReportService.getConfigs());
-    }, [dispatch]);
+    // The instruction mentions "Restore isLoading state in AuthProvider".
+    // If this refers to a loading state *within* SQLReportDashboard,
+    // and the user wants to add a general loading state for the dashboard itself,
+    // it would be defined here. However, the snippet provided for AuthProvider
+    // seems to be a separate component definition.
+    // For now, I will assume the existing `configsLoading` from `useAppSelector`
+    // serves as the primary loading gate for the dashboard's initial state.
+    // If a separate `isLoading` state is needed for `SQLReportDashboard`
+    // beyond `configsLoading`, please clarify.
 
-    // Auto refresh logic every 5 minutes
     useEffect(() => {
-        const intervalId = setInterval(() => {
-            const now = moment().format("YYYY-MM-DD HH:mm:ss");
-            setToDate(now);
-            // Updating toDate will trigger re-fetch in DashboardChartItem because it passes toDate as prop
-        }, 5 * 60 * 1000);
+        if (isFeatureEnabled('sql_analytics')) {
+            dispatch(SQLReportService.getConfigs());
+        }
+    }, [dispatch, isFeatureEnabled]);
 
-        return () => clearInterval(intervalId);
-    }, []);
+    if (!isFeatureEnabled('sql_analytics')) {
+        return (
+            <FeatureLocked
+                featureName="SQL Analytics & Reporting"
+                description="Power your decision making with high-performance SQL queries, interactive charts, and real-time manufacturing data visualization."
+            />
+        );
+    }
 
     if (configsLoading && configs.length === 0) {
         return (

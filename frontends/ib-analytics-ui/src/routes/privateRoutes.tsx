@@ -3,14 +3,6 @@ import { Routes, Route } from "react-router-dom";
 import ConsoleLayout from "../layouts/consoleLayout";
 import { AuthProvider } from "../hooks/RBACAuthProvider";
 
-import Home from "../page/publicpages/home";
-import ReportView from "../page/publicpages/reportview";
-import MachineConfigPage from "../page/publicpages/MachineConfigPage";
-import SchedulePage from "../page/privatepages/SchedulePage";
-import ShiftList from "../page/privatepages/ShiftList";
-import Dashboard from "../page/privatepages/Dashboard";
-import EventsList from "../page/privatepages/EventsList";
-import ReportHistoryPage from "../page/privatepages/ReportHistoryPage";
 import DocumentViewerPage from "../page/privatepages/DocumentViewerPage";
 import ReportConfigPage from "../page/privatepages/ReportConfigPage";
 import SQLReportViewPage from "../page/privatepages/SQLReportViewPage";
@@ -27,14 +19,14 @@ const PrivateRoutes: React.FC<PrivateRoutesProps> = ({ baseUrl }) => {
     <AuthProvider>
       <Routes>
         <Route element={<ConsoleLayout baseUrl={baseUrl} />}>
-          <Route path="home" element={<Home />} />
+          {/* <Route path="home" element={<Home />} />
           {/* <Route path="reportview" element={<ReportView />} /> */}
-          <Route path="machineconfigs" element={<MachineConfigPage />} />
+          {/* <Route path="machineconfigs" element={<MachineConfigPage />} />
           <Route path="scheduleconfigs" element={<SchedulePage />} />
           <Route path="shiftconfigs" element={<ShiftList />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="eventlogs" element={<EventsList />} />
-          <Route path="reporthistory" element={<ReportHistoryPage />} />
+          <Route path="reporthistory" element={<ReportHistoryPage />} /> */}
           <Route path="docviewer" element={<DocumentViewerPage />} />
           <Route path="sqlreportconfigs" element={<ReportConfigPage />} />
           <Route path="/" element={<SQLReportDashboard />} />

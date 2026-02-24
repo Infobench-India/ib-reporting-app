@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Form, Button, Row, Col, Card, Table } from "react-bootstrap";
+import { Form, Button, Row, Col, Card, Table, Modal } from "react-bootstrap";
+import ReportConfigService from "../../redux/features/apis/ReportConfigAPI";
+import Swal from "sweetalert2";
 
 interface SumItem {
     query: string;
@@ -54,6 +56,14 @@ interface Props {
 }
 
 const ReportFormComponent: React.FC<Props> = ({ initialData, onSave, onCancel }) => {
+    const [isTestingConn, setIsTestingConn] = useState(false);
+    const [isTestingQuery, setIsTestingQuery] = useState(false);
+    const [showDateModal, setShowDateModal] = useState(false);
+    const [testDates, setTestDates] = useState({
+        fromDate: new Date(new Date().setHours(0, 0, 0, 0)).toISOString().split('T')[0],
+        toDate: new Date().toISOString().split('T')[0]
+    });
+
     const [form, setForm] = useState<ReportConfig>({
         category: "",
         name: "",
@@ -83,6 +93,69 @@ const ReportFormComponent: React.FC<Props> = ({ initialData, onSave, onCancel })
         sum: [],
         charts: [],
     });
+
+    const handleTestConnection = async () => {
+        if (!form.connectionString) {
+            Swal.fire("Error", "Please enter a connection string first", "error");
+            return;
+        }
+        setIsTestingConn(true);
+        try {
+            const res = await ReportConfigService.testConnection(form.connectionString);
+            Swal.fire("Success", res.message || "Connection successful!", "success");
+        } catch (err: any) {
+            const msg = err.errors?.[0] || err.message || "Unknown error";
+            Swal.fire("Connection Failed", msg, "error");
+        } finally {
+            setIsTestingConn(false);
+        }
+    };
+
+    const handleTestQuery = () => {
+        if (!form.connectionString || !form.query) {
+            Swal.fire("Error", "Please enter both connection string and query first", "error");
+            return;
+        }
+
+        const hasDatePlaceholders = form.query.includes('$_FROM_DATE_$') || form.query.includes('$_TO_DATE_$');
+
+        if (hasDatePlaceholders) {
+            setShowDateModal(true);
+        } else {
+            executeTestQuery({});
+        }
+    };
+
+    const executeTestQuery = async (dates: { fromDate?: string, toDate?: string }) => {
+        setIsTestingQuery(true);
+        try {
+            let processedQuery = form.query;
+
+            // 1. Replace Table Name
+            processedQuery = processedQuery.replace(/\$_TABLE_NAME_\$/g, form.tableName || "");
+
+            // 2. Replace Dates if provided
+            if (dates.fromDate) {
+                processedQuery = processedQuery.replace(/\$_FROM_DATE_\$/g, dates.fromDate);
+            }
+            if (dates.toDate) {
+                processedQuery = processedQuery.replace(/\$_TO_DATE_\$/g, dates.toDate);
+            }
+
+            const res = await ReportConfigService.testQuery(form.connectionString, processedQuery);
+            Swal.fire({
+                title: "Query Valid!",
+                text: `Successfully executed. Columns found: ${res.columns?.join(', ') || 'None'}`,
+                icon: "success"
+            });
+        } catch (err: any) {
+            const msg = err.errors?.[0] || err.message || "Unknown error";
+            Swal.fire("Query Error", msg, "error");
+        } finally {
+            setIsTestingQuery(false);
+            setShowDateModal(false);
+        }
+    };
 
     useEffect(() => {
         if (initialData) {
@@ -181,12 +254,32 @@ const ReportFormComponent: React.FC<Props> = ({ initialData, onSave, onCancel })
             </Row>
 
             <Form.Group className="mb-2">
-                <Form.Label>Connection String *</Form.Label>
+                <Form.Label className="d-flex justify-content-between align-items-center">
+                    Connection String *
+                    <Button
+                        size="sm"
+                        variant="outline-info"
+                        onClick={handleTestConnection}
+                        disabled={isTestingConn}
+                    >
+                        {isTestingConn ? "Testing..." : "Test Connection"}
+                    </Button>
+                </Form.Label>
                 <Form.Control name="connectionString" value={form.connectionString} onChange={handleChange} required />
             </Form.Group>
 
             <Form.Group className="mb-2">
-                <Form.Label>Query *</Form.Label>
+                <Form.Label className="d-flex justify-content-between align-items-center">
+                    Query *
+                    <Button
+                        size="sm"
+                        variant="outline-info"
+                        onClick={handleTestQuery}
+                        disabled={isTestingQuery}
+                    >
+                        {isTestingQuery ? "Testing..." : "Test Query"}
+                    </Button>
+                </Form.Label>
                 <Form.Control as="textarea" rows={3} name="query" value={form.query} onChange={handleChange} required />
             </Form.Group>
 
@@ -316,6 +409,37 @@ const ReportFormComponent: React.FC<Props> = ({ initialData, onSave, onCancel })
                 <Button variant="secondary" onClick={onCancel}>Cancel</Button>
                 <Button variant="primary" type="submit">Save Report</Button>
             </div>
+
+            {/* Date Selection Modal for Test Query */}
+            <Modal show={showDateModal} onHide={() => setShowDateModal(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Select Dates for Testing</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form.Group className="mb-3">
+                        <Form.Label>From Date</Form.Label>
+                        <Form.Control
+                            type="date"
+                            value={testDates.fromDate}
+                            onChange={(e) => setTestDates({ ...testDates, fromDate: e.target.value })}
+                        />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label>To Date</Form.Label>
+                        <Form.Control
+                            type="date"
+                            value={testDates.toDate}
+                            onChange={(e) => setTestDates({ ...testDates, toDate: e.target.value })}
+                        />
+                    </Form.Group>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowDateModal(false)}>Cancel</Button>
+                    <Button variant="primary" onClick={() => executeTestQuery(testDates)} disabled={isTestingQuery}>
+                        {isTestingQuery ? "Testing..." : "Confirm & Test"}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </Form>
     );
 };

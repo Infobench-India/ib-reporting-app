@@ -26,7 +26,8 @@ async function fetchWithRetries() {
       const resp = await axios.get(`${AUTH_SERVICE_BASE}/api/auth/activation/status`, { timeout: 5000 });
       if (resp.status === 200) {
         console.log('Activation check successful:', resp.data);
-        return { activated: true, payload: resp.data.payload || null };
+        // Return the full data object from the response
+        return { activated: true, ...resp.data };
       }
       // Unexpected non-200 (shouldn't happen; treat as not activated)
       return { activated: false, reason: `unexpected-status-${resp.status}` };

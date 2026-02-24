@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useEffect, useState, useCallback } from 'react';
+import React, { createContext, ReactNode, useEffect, useState, useCallback, useMemo } from 'react';
 import { AuthService, User } from '../services/RBACAuthService';
 
 export interface AuthContextType {
@@ -13,6 +13,7 @@ export interface AuthContextType {
   hasRole: (role: string) => boolean;
   hasAnyRole: (roles: string[]) => boolean;
   hasAnyPermission: (permissions: string[]) => boolean;
+  isFeatureEnabled: (feature: string) => boolean;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,14 +25,28 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(AuthService.getUser());
   const [isLoading, setIsLoading] = useState(false);
+  const [license, setLicense] = useState<any>(null);
+
+  const fetchLicense = useCallback(async () => {
+    try {
+      const API_BASE_URL = import.meta.env.VITE_REACT_APP_AUTH_API_URL || 'http://localhost:3051/api/auth';
+      const res = await fetch(`${API_BASE_URL}/activation/status`, { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
+        setLicense(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch license', err);
+    }
+  }, []);
 
   useEffect(() => {
-    // Initialize authentication state from storage
     const storedUser = AuthService.getUser();
     if (storedUser) {
       setUser(storedUser);
     }
-  }, []);
+    fetchLicense();
+  }, [fetchLicense]);
 
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
@@ -58,7 +73,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setIsLoading(true);
       try {
         await AuthService.register(email, password, firstName, lastName);
-        // User is created but not logged in automatically
       } finally {
         setIsLoading(false);
       }
@@ -79,7 +93,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, []);
 
-  const value: AuthContextType = {
+  const isFeatureEnabled = useCallback((feature: string) => {
+    if (!license || !license.activated) return false;
+    return !!license.payload?.features?.[feature];
+  }, [license]);
+
+  const value = useMemo<AuthContextType>(() => ({
     user,
     isAuthenticated: AuthService.isAuthenticated(),
     isLoading,
@@ -91,7 +110,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     hasRole: (role: string) => AuthService.hasRole(role),
     hasAnyRole: (roles: string[]) => AuthService.hasAnyRole(roles),
     hasAnyPermission: (permissions: string[]) => AuthService.hasAnyPermission(permissions),
-  };
+    isFeatureEnabled
+  }), [user, isLoading, login, logout, register, refreshToken, isFeatureEnabled]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

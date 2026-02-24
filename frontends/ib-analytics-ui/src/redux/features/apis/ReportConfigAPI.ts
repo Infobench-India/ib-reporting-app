@@ -104,6 +104,24 @@ const ReportConfigService = {
             }
         }
     ),
+
+    testConnection: async (connectionString: string) => {
+        try {
+            const response = await API.post(`/test-connection`, { connectionString });
+            return response.data;
+        } catch (err: any) {
+            throw err.response?.data || err;
+        }
+    },
+
+    testQuery: async (connectionString: string, query: string) => {
+        try {
+            const response = await API.post(`/test-query`, { connectionString, query });
+            return response.data;
+        } catch (err: any) {
+            throw err.response?.data || err;
+        }
+    },
 };
 
 export default ReportConfigService;

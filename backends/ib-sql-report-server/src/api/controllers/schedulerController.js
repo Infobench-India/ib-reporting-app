@@ -11,6 +11,21 @@ exports.createSchedule = async (req, res) => {
         const pool = await getPool();
         const data = req.body;
 
+        // --- License Limits Check ---
+        const license = req.license || {};
+        const features = license.features || {};
+
+        if (features.autoEmail && features.numberOfEmails && data.recipients) {
+            const recipientCount = data.recipients.split(',').map(e => e.trim()).filter(e => e).length;
+            if (recipientCount > features.numberOfEmails) {
+                return res.status(403).json({
+                    success: false,
+                    errors: [`License Limit Exceeded: Your license allows a maximum of ${features.numberOfEmails} recipients per schedule. Current: ${recipientCount}.`]
+                });
+            }
+        }
+        // ----------------------------
+
         // Calculate initial next execution
         let nextExecution;
         if (data.nextExecution && data.nextExecution !== "") {
@@ -86,6 +101,21 @@ exports.updateSchedule = async (req, res) => {
         await ensureTables();
         const pool = await getPool();
         const data = req.body;
+
+        // --- License Limits Check ---
+        const license = req.license || {};
+        const features = license.features || {};
+
+        if (features.autoEmail && features.numberOfEmails && data.recipients) {
+            const recipientCount = data.recipients.split(',').map(e => e.trim()).filter(e => e).length;
+            if (recipientCount > features.numberOfEmails) {
+                return res.status(403).json({
+                    success: false,
+                    errors: [`License Limit Exceeded: Your license allows a maximum of ${features.numberOfEmails} recipients per schedule. Current: ${recipientCount}.`]
+                });
+            }
+        }
+        // ----------------------------
 
         // Fetch current schedule to check if time changed
         const currentRes = await pool.request()

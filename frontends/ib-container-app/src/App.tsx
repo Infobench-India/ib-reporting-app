@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Container, Spinner, Row, Col, Button } from 'react-bootstrap';
+import { brandingConfig } from './config/brandingConfig';
 const API_URL = import.meta.env.VITE_AUTH_API_URL || 'http://localhost:3051/api/auth';
 // Dynamic import for Analytics MFE
 // @ts-ignore
@@ -59,10 +60,10 @@ const LandingHome = () => {
             </span>
           </motion.div>
           <motion.h2 variants={itemVariants} className="display-4 fw-bold text-dark mb-3">
-            Infobench <span className="text-primary">Reporting System</span>
+            {brandingConfig.clientName} <span className="text-primary">{brandingConfig.appName.replace(brandingConfig.clientName, '').trim()}</span>
           </motion.h2>
           <motion.p variants={itemVariants} className="lead text-muted mx-auto mb-5" style={{ maxWidth: '750px' }}>
-            An enterprise-grade platform centralizing manufacturing intelligence.
+            An enterprise-grade platform centralizing manufacturing intelligence for {brandingConfig.clientName}.
             Transform raw production data into actionable insights through automated scheduling,
             real-time monitoring, and advanced SQL analytics.
           </motion.p>
