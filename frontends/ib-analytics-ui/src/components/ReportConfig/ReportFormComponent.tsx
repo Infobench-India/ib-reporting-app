@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Form, Button, Row, Col, Card, Table, Modal } from "react-bootstrap";
 import ReportConfigService from "../../redux/features/apis/ReportConfigAPI";
 import Swal from "sweetalert2";
+import DatePicker from "react-datepicker";
+import moment from "moment";
 
 interface SumItem {
     query: string;
@@ -59,10 +61,8 @@ const ReportFormComponent: React.FC<Props> = ({ initialData, onSave, onCancel })
     const [isTestingConn, setIsTestingConn] = useState(false);
     const [isTestingQuery, setIsTestingQuery] = useState(false);
     const [showDateModal, setShowDateModal] = useState(false);
-    const [testDates, setTestDates] = useState({
-        fromDate: new Date(new Date().setHours(0, 0, 0, 0)).toISOString().split('T')[0],
-        toDate: new Date().toISOString().split('T')[0]
-    });
+    const [fromDate, setFromDate] = useState<Date>(new Date(new Date().setHours(0, 0, 0, 0)));
+    const [toDate, setToDate] = useState<Date>(new Date());
 
     const [form, setForm] = useState<ReportConfig>({
         category: "",
@@ -418,24 +418,28 @@ const ReportFormComponent: React.FC<Props> = ({ initialData, onSave, onCancel })
                 <Modal.Body>
                     <Form.Group className="mb-3">
                         <Form.Label>From Date</Form.Label>
-                        <Form.Control
-                            type="date"
-                            value={testDates.fromDate}
-                            onChange={(e) => setTestDates({ ...testDates, fromDate: e.target.value })}
+                        <DatePicker
+                            selected={fromDate}
+                            onChange={(date: Date | null) => date && setFromDate(date)}
+                            showTimeSelect
+                            dateFormat="yyyy-MM-dd HH:mm"
+                            className="form-control"
                         />
                     </Form.Group>
                     <Form.Group className="mb-3">
                         <Form.Label>To Date</Form.Label>
-                        <Form.Control
-                            type="date"
-                            value={testDates.toDate}
-                            onChange={(e) => setTestDates({ ...testDates, toDate: e.target.value })}
+                        <DatePicker
+                            selected={toDate}
+                            onChange={(date: Date | null) => date && setToDate(date)}
+                            showTimeSelect
+                            dateFormat="yyyy-MM-dd HH:mm"
+                            className="form-control"
                         />
                     </Form.Group>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setShowDateModal(false)}>Cancel</Button>
-                    <Button variant="primary" onClick={() => executeTestQuery(testDates)} disabled={isTestingQuery}>
+                    <Button variant="primary" onClick={() => executeTestQuery({ fromDate: moment(fromDate).format("YYYY-MM-DD HH:mm:ss"), toDate: moment(toDate).format("YYYY-MM-DD HH:mm:ss") })} disabled={isTestingQuery}>
                         {isTestingQuery ? "Testing..." : "Confirm & Test"}
                     </Button>
                 </Modal.Footer>
