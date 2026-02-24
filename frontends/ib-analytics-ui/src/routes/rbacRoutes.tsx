@@ -19,6 +19,7 @@ import ReportConfigPage from '../page/privatepages/ReportConfigPage';
 import SQLReportViewPage from '../page/privatepages/SQLReportViewPage';
 import SQLSchedulePage from '../page/privatepages/SQLSchedulePage';
 import SQLHistoryPage from '../page/privatepages/SQLHistoryPage';
+import SQLReportDashboard from '../page/privatepages/SQLReportDashboard';
 // import ErrorPage from '../page/error';
 
 interface RBACRoutesProps {
@@ -73,6 +74,14 @@ const RBACRoutes: React.FC<RBACRoutesProps> = ({ baseUrl }) => {
             element={
               <ProtectedRoute requiredPermissions={['read_report']}>
                 <SQLHistoryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="sqlreportdashboard"
+            element={
+              <ProtectedRoute requiredPermissions={['read_report']}>
+                <SQLReportDashboard />
               </ProtectedRoute>
             }
           />

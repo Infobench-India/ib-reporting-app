@@ -29,6 +29,15 @@ interface SQLReportState {
         currentPage: number;
         itemsPerPage: number;
     } | null;
+    dashboardData: {
+        [key: string]: {
+            reportData: any[];
+            charts: any[] | null;
+            pagination: any | null;
+            loading: boolean;
+            error: string | null;
+        };
+    };
     loading: boolean;
     error: string | null;
 }
@@ -38,6 +47,7 @@ const initialState: SQLReportState = {
     reportData: [],
     charts: null,
     pagination: null,
+    dashboardData: {},
     loading: false,
     error: null,
 };
@@ -50,6 +60,9 @@ const sqlReportSlice = createSlice({
             state.reportData = [];
             state.charts = null;
             state.pagination = null;
+        },
+        clearDashboardData: (state) => {
+            state.dashboardData = {};
         }
     },
     extraReducers: (builder) => {
@@ -68,22 +81,55 @@ const sqlReportSlice = createSlice({
         });
 
         // Execute Report
-        builder.addCase(SQLReportService.executeReport.pending, (state) => {
-            state.loading = true;
-            state.error = null;
+        builder.addCase(SQLReportService.executeReport.pending, (state, action) => {
+            const { reportKey } = action.meta.arg;
+            if (reportKey) {
+                state.dashboardData[reportKey] = {
+                    ...(state.dashboardData[reportKey] || {}),
+                    loading: true,
+                    error: null,
+                    reportData: state.dashboardData[reportKey]?.reportData || [],
+                    charts: state.dashboardData[reportKey]?.charts || null,
+                    pagination: state.dashboardData[reportKey]?.pagination || null,
+                };
+            } else {
+                state.loading = true;
+                state.error = null;
+            }
         });
         builder.addCase(SQLReportService.executeReport.fulfilled, (state, action) => {
-            state.loading = false;
-            state.reportData = action.payload.data;
-            state.charts = action.payload.charts;
-            state.pagination = action.payload.pagination;
+            const { reportKey } = action.meta.arg;
+            if (reportKey) {
+                state.dashboardData[reportKey] = {
+                    loading: false,
+                    error: null,
+                    reportData: action.payload.data,
+                    charts: action.payload.charts,
+                    pagination: action.payload.pagination,
+                };
+            } else {
+                state.loading = false;
+                state.reportData = action.payload.data;
+                state.charts = action.payload.charts;
+                state.pagination = action.payload.pagination;
+            }
         });
         builder.addCase(SQLReportService.executeReport.rejected, (state, action: any) => {
-            state.loading = false;
-            state.error = action.payload?.errors?.[0] || "Failed to execute report";
+            const { reportKey } = action.meta.arg;
+            const errorMsg = action.payload?.errors?.[0] || "Failed to execute report";
+            if (reportKey) {
+                state.dashboardData[reportKey] = {
+                    ...(state.dashboardData[reportKey] || { reportData: [], charts: null, pagination: null }),
+                    loading: false,
+                    error: errorMsg,
+                };
+            } else {
+                state.loading = false;
+                state.error = errorMsg;
+            }
         });
     },
 });
 
-export const { clearReportData } = sqlReportSlice.actions;
+export const { clearReportData, clearDashboardData } = sqlReportSlice.actions;
 export default sqlReportSlice.reducer;

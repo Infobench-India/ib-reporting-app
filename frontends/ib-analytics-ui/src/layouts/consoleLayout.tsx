@@ -1,34 +1,21 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
-import { useEffect, useState } from "react";
+import { useRBACAuth } from "../hooks/useRBACAuth";
+import { useState } from "react";
 import TopNavBars from "../components/navBars/topNavBars";
 import { getNavItems } from "../constants/commonConstants";
-import { useAppDispatch } from "../store";
-import { loadUser } from "../redux/auth/authSlice";
 
 function ConsoleLayout({ baseUrl }: { baseUrl: string }) {
-  const auth: any = useAuth();
+  const { isAuthenticated, user, isLoading } = useRBACAuth();
   const { pathname } = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const dispatch = useAppDispatch();
 
   const navItems = getNavItems(baseUrl);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      if (auth?.isAuth) {
-        const result = await auth.isAuth();
-        setIsAuthenticated(result);
-        if (auth?.isAuth()) { // to do revert to result
-          const user = await auth.getSession(); // Get session info
-          dispatch(loadUser(user));
-        }
-      }
-    };
-    checkAuth();
-  }, [auth, dispatch]);
-  if (auth && auth?.isAuth()) {
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isAuthenticated) {
     return (
       <>
         <TopNavBars navItems={navItems}></TopNavBars>
@@ -46,7 +33,7 @@ function ConsoleLayout({ baseUrl }: { baseUrl: string }) {
     );
   }
 
-  return <Navigate to={`/auth/login`} replace />;
+  return <Navigate to={`/login`} replace />;
 }
 
 export default ConsoleLayout;

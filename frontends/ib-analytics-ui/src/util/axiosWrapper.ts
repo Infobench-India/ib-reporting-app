@@ -1,4 +1,7 @@
 import axios from 'axios';
+import { store } from '../store';
+import { setError } from '../redux/errorSlice';
+
 const VITE_MES_API_URL = import.meta.env.VITE_MES_API_URL;
 const API = axios.create({
   baseURL: VITE_MES_API_URL ? VITE_MES_API_URL + "/api" : "http://localhost:5002/api",
@@ -37,5 +40,25 @@ API.interceptors.request.use((config) => {
 }, (error) => {
   return Promise.reject(error);
 });
+
+// Add response interceptor for global error handling
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const message = error.response?.data?.message || error.message || 'An unexpected error occurred';
+
+    // Redirect to login if session expired
+    if (error.response?.status === 401) {
+      store.dispatch(setError({ message: 'Session expired. Please login again.', type: 'error' }));
+      // Clear token and redirect
+      localStorage.removeItem('accessToken');
+      window.location.href = '/login';
+    } else {
+      store.dispatch(setError({ message, type: 'error' }));
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 export default API;

@@ -18,6 +18,10 @@ export const getNavItems = (baseUrl: string) => [
   {
     label: "Sql Report History",
     href: `${baseUrl}/sqlreporthistory`
+  },
+  {
+    label: "Sql Report Dashboard",
+    href: `${baseUrl}/sqlreportdashboard`
   }
 ];
 

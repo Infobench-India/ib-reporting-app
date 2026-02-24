@@ -1,4 +1,7 @@
 import axios from 'axios';
+import { store } from '../store';
+import { setError } from '../redux/errorSlice';
+
 const SQL_API_BASE_URL = import.meta.env.VITE_SQL_API_BASE_URL + "/api" || "http://localhost:3052/api"; // Use your environment variable for the base URL
 
 // Assuming the SQL Report Server runs on port 3052 as per .env created earlier
@@ -41,5 +44,25 @@ SQL_API.interceptors.request.use((config) => {
 }, (error) => {
     return Promise.reject(error);
 });
+
+// Add response interceptor for global error handling
+SQL_API.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        const message = error.response?.data?.message || error.message || 'An unexpected error occurred';
+
+        // Redirect to login if session expired
+        if (error.response?.status === 401) {
+            store.dispatch(setError({ message: 'Session expired. Please login again.', type: 'error' }));
+            // Clear token and redirect
+            localStorage.removeItem('accessToken');
+            window.location.href = '/login';
+        } else {
+            store.dispatch(setError({ message, type: 'error' }));
+        }
+
+        return Promise.reject(error);
+    }
+);
 
 export default SQL_API;

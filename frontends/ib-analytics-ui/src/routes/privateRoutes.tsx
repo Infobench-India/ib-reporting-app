@@ -1,7 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import ConsoleLayout from "../layouts/consoleLayout";
-import AuthProvider from "../hooks/AuthProvider";
+import { AuthProvider } from "../hooks/RBACAuthProvider";
 
 import Home from "../page/publicpages/home";
 import ReportView from "../page/publicpages/reportview";
@@ -16,6 +16,7 @@ import ReportConfigPage from "../page/privatepages/ReportConfigPage";
 import SQLReportViewPage from "../page/privatepages/SQLReportViewPage";
 import SQLSchedulePage from "../page/privatepages/SQLSchedulePage";
 import SQLHistoryPage from "../page/privatepages/SQLHistoryPage";
+import SQLReportDashboard from "../page/privatepages/SQLReportDashboard";
 
 interface PrivateRoutesProps {
   baseUrl: string;
@@ -36,9 +37,10 @@ const PrivateRoutes: React.FC<PrivateRoutesProps> = ({ baseUrl }) => {
           <Route path="reporthistory" element={<ReportHistoryPage />} />
           <Route path="docviewer" element={<DocumentViewerPage />} />
           <Route path="sqlreportconfigs" element={<ReportConfigPage />} />
-          <Route path="/" element={<SQLReportViewPage />} />
+          <Route path="/" element={<SQLReportDashboard />} />
           <Route path="sqlreportschedule" element={<SQLSchedulePage />} />
           <Route path="sqlreporthistory" element={<SQLHistoryPage />} />
+          <Route path="sqlreportdashboard" element={<SQLReportViewPage />} />
         </Route>
       </Routes>
     </AuthProvider>

@@ -7,7 +7,7 @@
     "backends/ib-auth-service",
     "backends/ib-sql-report-server",
     "frontends/ib-container-app",
-    "frontends/ib-analytics-app"
+    "frontends/ib-analytics-ui"
   ],
   "scripts": {
     "install:all": "npm install",

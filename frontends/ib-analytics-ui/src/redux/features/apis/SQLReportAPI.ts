@@ -23,6 +23,7 @@ const SQLReportService = {
             toDate: string;
             page: number;
             limit: number;
+            reportKey?: string;
         }, { rejectWithValue }) => {
             try {
                 const response = await SQL_API.post(`/sql-report/execute`, payload);
