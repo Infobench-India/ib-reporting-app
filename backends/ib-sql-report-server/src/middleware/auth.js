@@ -30,7 +30,7 @@ const authorize = (requiredPermissions = []) => {
       }
 
       const userPermissions = req.user.permissions || [];
-
+      console.log("@@@@", req.user)
       if (requiredPermissions.length === 0) {
         return next();
       }

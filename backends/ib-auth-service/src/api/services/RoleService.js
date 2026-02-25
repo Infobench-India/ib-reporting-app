@@ -30,7 +30,7 @@ class RoleService {
 
     try {
       const query = `
-        SELECT id, name, description, isActive
+        SELECT id, name, description, "isActive"
         FROM Roles
         WHERE id = @roleId;
       `;
@@ -94,7 +94,7 @@ class RoleService {
 
     try {
       // Check then insert for portability
-      const checkQuery = `SELECT 1 FROM RolePermissions WHERE roleId = @roleId AND permissionId = @permissionId`;
+      const checkQuery = `SELECT 1 FROM RolePermissions WHERE "roleId" = @roleId AND "permissionId" = @permissionId`;
       const checkRes = await p.query(checkQuery, { roleId, permissionId });
 
       if (checkRes.rows.length === 0) {

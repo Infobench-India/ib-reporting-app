@@ -8,9 +8,9 @@ class PermissionService {
 
     try {
       const query = `
-        SELECT id, name, description, action, resource, isActive
+        SELECT id, name, description, action, resource, "isActive"
         FROM Permissions
-        WHERE isActive = ${p.type === 'mssql' ? 1 : 'TRUE'}
+        WHERE "isActive" = ${p.type === 'mssql' ? 1 : 1}
         ORDER BY resource, action;
       `;
 
@@ -27,7 +27,7 @@ class PermissionService {
 
     try {
       const query = `
-        SELECT id, name, description, action, resource, isActive
+        SELECT id, name, description, action, resource, "isActive"
         FROM Permissions
         WHERE id = @permissionId;
       `;
@@ -60,7 +60,7 @@ class PermissionService {
       });
       logger.info(`Permission created: ${name}`);
 
-      return { id: permissionId, name, description, action, resource, isActive: true };
+      return { id: permissionId, name, description, action, resource, isActive: 1 };
     } catch (err) {
       logger.error('Create permission failed:', err);
       throw err;
