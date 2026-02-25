@@ -23,8 +23,7 @@ export const getAll = createAsyncThunk('auditlogState/getAll', async (params: IF
     const response = await API.get(`/auditlogs?${queryParams.toString()}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.message || 'Failed to get part scans'));
-    throw error; // Rethrow the error for further handling if needed
+    throw error; // Rethrow for global interceptor and internal thunk handling
   }
 });
 

@@ -4,17 +4,17 @@ const logger = require('../../main/common/logger');
 
 class SystemConfigService {
     static async getAll() {
-        const pool = await getPool();
+        const p = await getPool();
         try {
             const query = `
-        SELECT id, [key], [value], description, createdAt, updatedAt
+        SELECT id, ${p.escapeIdentifier('key')}, ${p.escapeIdentifier('value')}, description, "createdAt", "updatedAt"
         FROM SystemConfigs
-        ORDER BY [key];
+        ORDER BY ${p.escapeIdentifier('key')};
       `;
-            const result = await pool.request().query(query);
+            const result = await p.query(query);
 
             // Parse JSON values
-            return result.recordset.map(row => ({
+            return result.rows.map(row => ({
                 ...row,
                 value: row.value ? JSON.parse(row.value) : null
             }));
@@ -25,18 +25,16 @@ class SystemConfigService {
     }
 
     static async getByKey(key) {
-        const pool = await getPool();
+        const p = await getPool();
         try {
             const query = `
-        SELECT id, [key], [value], description, createdAt, updatedAt
+        SELECT id, ${p.escapeIdentifier('key')}, ${p.escapeIdentifier('value')}, description, "createdAt", "updatedAt"
         FROM SystemConfigs
-        WHERE [key] = @key;
+        WHERE ${p.escapeIdentifier('key')} = @key;
       `;
-            const result = await pool.request()
-                .input('key', key)
-                .query(query);
+            const result = await p.query(query, { key });
 
-            const config = result.recordset[0];
+            const config = result.rows[0];
             if (config && config.value) {
                 config.value = JSON.parse(config.value);
             }
@@ -48,7 +46,7 @@ class SystemConfigService {
     }
 
     static async upsert(key, value, description = null) {
-        const pool = await getPool();
+        const p = await getPool();
         try {
             const existing = await this.getByKey(key);
             const jsonValue = JSON.stringify(value);
@@ -56,31 +54,31 @@ class SystemConfigService {
             if (existing) {
                 const query = `
           UPDATE SystemConfigs 
-          SET [value] = @value, 
+          SET ${p.escapeIdentifier('value')} = @value, 
               description = COALESCE(@description, description),
-              updatedAt = GETDATE()
-          WHERE [key] = @key;
+              updatedAt = ${p.type === 'mssql' ? 'GETDATE()' : 'CURRENT_TIMESTAMP'}
+          WHERE ${p.escapeIdentifier('key')} = @key;
         `;
-                await pool.request()
-                    .input('key', key)
-                    .input('value', jsonValue)
-                    .input('description', description)
-                    .query(query);
+                await p.query(query, {
+                    key,
+                    value: jsonValue,
+                    description
+                });
 
                 logger.info(`System config updated: ${key}`);
                 return await this.getByKey(key);
             } else {
                 const id = uuidv4();
                 const query = `
-          INSERT INTO SystemConfigs (id, [key], [value], description, createdAt, updatedAt)
-          VALUES (@id, @key, @value, @description, GETDATE(), GETDATE());
+          INSERT INTO SystemConfigs (id, ${p.escapeIdentifier('key')}, ${p.escapeIdentifier('value')}, description, "createdAt", "updatedAt")
+          VALUES (@id, @key, @value, @description, ${p.type === 'mssql' ? 'GETDATE()' : 'CURRENT_TIMESTAMP'}, ${p.type === 'mssql' ? 'GETDATE()' : 'CURRENT_TIMESTAMP'});
         `;
-                await pool.request()
-                    .input('id', id)
-                    .input('key', key)
-                    .input('value', jsonValue)
-                    .input('description', description)
-                    .query(query);
+                await p.query(query, {
+                    id,
+                    key,
+                    value: jsonValue,
+                    description
+                });
 
                 logger.info(`System config created: ${key}`);
                 return { id, key, value, description };
@@ -92,12 +90,10 @@ class SystemConfigService {
     }
 
     static async delete(id) {
-        const pool = await getPool();
+        const p = await getPool();
         try {
             const query = `DELETE FROM SystemConfigs WHERE id = @id;`;
-            await pool.request()
-                .input('id', id)
-                .query(query);
+            await p.query(query, { id });
 
             logger.info(`System config deleted: ${id}`);
         } catch (err) {

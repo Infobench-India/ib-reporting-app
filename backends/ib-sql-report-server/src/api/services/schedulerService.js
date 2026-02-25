@@ -1,7 +1,7 @@
 const cron = require('node-cron');
 const axios = require('axios');
 const path = require('path');
-const { getPool, sql, ensureTables } = require('../../utils/db');
+const { getPool } = require('../../utils/db');
 const { sendEmail } = require('./emailService');
 const logger = require('../../main/common/logger');
 const moment = require('moment-timezone');
@@ -44,16 +44,15 @@ const initScheduler = async () => {
 
 const cleanupRunningSchedules = async () => {
     try {
-        await ensureTables();
-        const pool = await getPool();
-        const result = await pool.request()
-            .input('status', sql.NVarChar, 'Running')
-            .input('newStatus', sql.NVarChar, 'Interrupted')
-            .input('errorMessage', sql.NVarChar, 'Service restarted during execution')
-            .query('UPDATE ReportScheduleHistory SET status = @newStatus, errorMessage = @errorMessage WHERE status = @status');
+        const p = await getPool();
+        const result = await p.query('UPDATE ReportScheduleHistory SET status = @newStatus, errorMessage = @errorMessage WHERE status = @status', {
+            status: 'Running',
+            newStatus: 'Interrupted',
+            errorMessage: 'Service restarted during execution'
+        });
 
-        if (result.rowsAffected[0] > 0) {
-            logger.info(`Cleaned up ${result.rowsAffected[0]} stuck 'Running' schedules.`);
+        if (result.rowsAffected > 0) {
+            logger.info(`Cleaned up ${result.rowsAffected} stuck 'Running' schedules.`);
         }
     } catch (error) {
         logger.error('Error in cleanupRunningSchedules:', error);
@@ -62,12 +61,11 @@ const cleanupRunningSchedules = async () => {
 
 const processSchedules = async () => {
     try {
-        await ensureTables();
-        const pool = await getPool();
+        const p = await getPool();
 
         // Find active schedules where nextExecution is null or <= current time
         // AND there is no current 'Running' execution in history
-        const schedulesRes = await pool.request().query(`
+        const schedulesRes = await p.query(`
             SELECT s.*, r.category, r.name as reportName, r.query as sqlQuery, r.connectionString as reportConn, r.tableName, r.templateName,
                    r.maxRowPerPage, r.maxAvailableRowPerPage, r.sumStartColumnNumber, r.maxSumStartColumnNumber,
                    r.reportHeaderBlankRowCount, r.reportHeaderStartRowNo, r.reportHeaderRowCount,
@@ -77,19 +75,19 @@ const processSchedules = async () => {
             FROM ReportSchedules s
             JOIN ReportConfigs r ON s.reportId = r.id
             WHERE s.status = 'Active' 
-            AND (s.nextExecution IS NULL OR s.nextExecution <= GETDATE())
+            AND (s.nextExecution IS NULL OR s.nextExecution <= ${p.type === 'mssql' ? 'GETDATE()' : 'CURRENT_TIMESTAMP'})
             AND NOT EXISTS (
                 SELECT 1 FROM ReportScheduleHistory h 
                 WHERE h.scheduleId = s.id AND h.status = 'Running'
             )
         `);
 
-        logger.info(`Found ${schedulesRes.recordset.length} schedules due for execution.`);
-        if (schedulesRes.recordset.length > 0) {
-            logger.info(`Due schedules: ${schedulesRes.recordset.map(s => s.name).join(', ')}`);
+        logger.info(`Found ${schedulesRes.rows.length} schedules due for execution.`);
+        if (schedulesRes.rows.length > 0) {
+            logger.info(`Due schedules: ${schedulesRes.rows.map(s => s.name).join(', ')}`);
         }
 
-        for (const schedule of schedulesRes.recordset) {
+        for (const schedule of schedulesRes.rows) {
             await executeSchedule(schedule);
         }
     } catch (error) {
@@ -98,19 +96,24 @@ const processSchedules = async () => {
 };
 
 const executeSchedule = async (schedule) => {
-    const pool = await getPool();
+    const p = await getPool();
     let historyId;
 
     try {
         logger.info(`Executing schedule: ${schedule.name} for report: ${schedule.reportName}`);
 
-        // 1. Create history record (Pending)
-        const histRes = await pool.request()
-            .input('scheduleId', sql.Int, schedule.id)
-            .input('status', sql.NVarChar, 'Running')
-            .input('executionTime', sql.DateTime, new Date())
-            .query('INSERT INTO ReportScheduleHistory (scheduleId, status, executionTime) OUTPUT INSERTED.id VALUES (@scheduleId, @status, @executionTime)');
-        historyId = histRes.recordset[0].id;
+        // 1. Create history record (Running)
+        const histRes = await p.executeInsert(
+            'ReportScheduleHistory',
+            'scheduleId, status, executionTime',
+            '@scheduleId, @status, @executionTime',
+            {
+                scheduleId: schedule.id,
+                status: 'Running',
+                executionTime: new Date()
+            }
+        );
+        historyId = histRes.rows[0].id;
 
         // 2. Fetch Data from SQL
         const fromDateStr = moment(schedule.startDateTime).format('YYYY-MM-DD');
@@ -122,8 +125,8 @@ const executeSchedule = async (schedule) => {
         query = query.replace(/\$_TABLE_NAME_\$/g, schedule.tableName);
 
         const dataPool = await getPool(schedule.reportConn);
-        const dataRes = await dataPool.request().query(query);
-        const tableData = dataRes.recordset;
+        const dataRes = await dataPool.query(query);
+        const tableData = dataRes.rows;
 
         if (tableData.length === 0) {
             logger.warn(`No data found for schedule ${schedule.name}`);
@@ -196,12 +199,12 @@ const executeSchedule = async (schedule) => {
         const fileName = `${schedule.reportName}_${moment().format('YYYYMMDD_HHmmss')}.pdf`;
 
         // 5. Update History with Attachment
-        await pool.request()
-            .input('id', sql.Int, historyId)
-            .input('status', sql.NVarChar, 'Success')
-            .input('attachment', sql.VarBinary(sql.MAX), attachmentBuffer)
-            .input('fileName', sql.NVarChar, fileName)
-            .query('UPDATE ReportScheduleHistory SET status = @status, attachment = @attachment, fileName = @fileName WHERE id = @id');
+        await p.query('UPDATE ReportScheduleHistory SET status = @status, attachment = @attachment, fileName = @fileName WHERE id = @id', {
+            id: historyId,
+            status: 'Success',
+            attachment: attachmentBuffer,
+            fileName: fileName
+        });
 
         // 6. Send Email
         await sendEmail({
@@ -216,15 +219,20 @@ const executeSchedule = async (schedule) => {
         const nextEnd = moment(schedule.endDateTime).add(1, 'days').toDate();
 
         // Calculate next execution date
-        const [hour, minute] = schedule.scheduleTime.split(':').map(Number);
+        const [hour, minute] = (schedule.scheduleTime || '00:00').split(':').map(Number);
         let nextExecution = moment().add(1, 'days').hour(hour).minute(minute).second(0).toDate();
 
-        await pool.request()
-            .input('id', sql.Int, schedule.id)
-            .input('startDateTime', sql.DateTime, nextStart)
-            .input('endDateTime', sql.DateTime, nextEnd)
-            .input('nextExecution', sql.DateTime, nextExecution)
-            .query('UPDATE ReportSchedules SET startDateTime = @startDateTime, endDateTime = @endDateTime, nextExecution = @nextExecution, updatedAt = GETDATE() WHERE id = @id');
+        await p.query(`
+            UPDATE ReportSchedules 
+            SET startDateTime = @startDateTime, endDateTime = @endDateTime, nextExecution = @nextExecution, 
+                updatedAt = ${p.type === 'mssql' ? 'GETDATE()' : 'CURRENT_TIMESTAMP'} 
+            WHERE id = @id
+        `, {
+            id: schedule.id,
+            startDateTime: nextStart,
+            endDateTime: nextEnd,
+            nextExecution: nextExecution
+        });
 
         logger.info(`Successfully completed schedule: ${schedule.name}`);
 
@@ -247,13 +255,17 @@ const executeSchedule = async (schedule) => {
         logger.error(`Error executing schedule ${schedule.name}: ${errorMsg}`);
 
         if (historyId) {
-            await pool.request()
-                .input('id', sql.Int, historyId)
-                .input('status', sql.NVarChar, 'Failure')
-                .input('errorMessage', sql.NVarChar, errorMsg)
-                .query('UPDATE ReportScheduleHistory SET status = @status, errorMessage = @errorMessage WHERE id = @id');
+            await p.query('UPDATE ReportScheduleHistory SET status = @status, errorMessage = @errorMessage WHERE id = @id', {
+                id: historyId,
+                status: 'Failure',
+                errorMessage: errorMsg
+            });
         }
     }
+};
+
+module.exports = {
+    initScheduler
 };
 
 module.exports = {

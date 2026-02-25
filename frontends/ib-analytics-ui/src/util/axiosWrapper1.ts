@@ -30,7 +30,16 @@ API.interceptors.request.use((config) => {
 API.interceptors.response.use(
   (response) => response,
   (error) => {
-    const message = error.response?.data?.message || error.message || 'An unexpected error occurred';
+    let message = error.response?.data?.message;
+
+    if (!message && error.response?.data?.errors) {
+      const errors = error.response.data.errors;
+      message = Array.isArray(errors) ? errors.join(', ') : String(errors);
+    }
+
+    if (!message) {
+      message = error.message || 'An unexpected error occurred';
+    }
 
     // Redirect to login if session expired
     if (error.response?.status === 401) {

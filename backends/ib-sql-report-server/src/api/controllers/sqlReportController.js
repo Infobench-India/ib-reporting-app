@@ -1,22 +1,23 @@
-const { getPool, ensureTables, ensureReportTable, sql } = require('../../utils/db');
+const { getPool, ensureTables, ensureReportTable } = require('../../utils/db');
 const logger = require('../../main/common/logger');
 
 exports.getConfigs = async (req, res) => {
     try {
         await ensureTables();
-        const pool = await getPool();
-        const result = await pool.request().query('SELECT category, name FROM ReportConfigs');
-        const configs = result.recordset;
+        const p = await getPool();
+        const result = await p.query('SELECT category, name FROM ReportConfigs');
+        const configs = result.rows;
 
         // Fetch charts for each config
         for (const config of configs) {
-            const chartResult = await pool.request()
-                .input('name', sql.NVarChar, config.name)
-                .query(`SELECT rc.chartType, rc.chartTitle, rc.xAxisColumn, rc.yAxisColumns, rc.xAxisLabel, rc.yAxisLabel 
-                        FROM ReportCharts rc 
-                        JOIN ReportConfigs rcf ON rc.reportId = rcf.id 
-                        WHERE rcf.name = @name`);
-            config.charts = chartResult.recordset;
+            const chartResult = await p.query(
+                `SELECT rc.chartType, rc.chartTitle, rc.xAxisColumn, rc.yAxisColumns, rc.xAxisLabel, rc.yAxisLabel 
+                 FROM ReportCharts rc 
+                 JOIN ReportConfigs rcf ON rc.reportId = rcf.id 
+                 WHERE rcf.name = @name`,
+                { name: config.name }
+            );
+            config.charts = chartResult.rows;
         }
 
         res.json({ success: true, data: configs });
@@ -30,17 +31,17 @@ exports.executeReport = async (req, res) => {
     const { category, reportName, fromDate, toDate, page = 1, limit = 20 } = req.body;
 
     try {
-        const pool = await getPool();
-        const configResult = await pool.request()
-            .input('category', sql.NVarChar, category)
-            .input('name', sql.NVarChar, reportName)
-            .query('SELECT * FROM ReportConfigs WHERE category = @category AND name = @name');
+        const p = await getPool();
+        const configResult = await p.query(
+            'SELECT * FROM ReportConfigs WHERE category = @category AND name = @name',
+            { category, name: reportName }
+        );
 
-        if (configResult.recordset.length === 0) {
+        if (configResult.rows.length === 0) {
             return res.status(404).json({ success: false, errors: ['Report configuration not found'] });
         }
 
-        const config = configResult.recordset[0];
+        const config = configResult.rows[0];
 
         let query = config.query;
         query = query.replace(/\$_FROM_DATE_\$/g, fromDate);
@@ -49,8 +50,8 @@ exports.executeReport = async (req, res) => {
 
         const offset = (page - 1) * limit;
         let paginatedQuery = query;
-        if (!query.toLowerCase().includes('offset')) {
-            paginatedQuery = `${query} OFFSET ${offset} ROWS FETCH NEXT ${limit} ROWS ONLY`;
+        if (!query.toLowerCase().includes('offset') && !query.toLowerCase().includes('limit')) {
+            paginatedQuery = `${query} ${p.getPaginationSnippet(offset, limit)}`;
         }
 
         const fromIndex = query.toLowerCase().indexOf('from');
@@ -58,24 +59,25 @@ exports.executeReport = async (req, res) => {
         const countBase = query.substring(fromIndex, orderByIndex !== -1 ? orderByIndex : query.length);
         const countQuery = `SELECT COUNT(*) as total ${countBase}`;
 
-        const dataPool = await getPool(config.connectionString);
+        const dataProvider = await getPool(config.connectionString);
         console.log("SQL Query and Connection", query, config.connectionString)
         const [result, countResult] = await Promise.all([
-            dataPool.request().query(paginatedQuery),
-            dataPool.request().query(countQuery)
+            dataProvider.query(paginatedQuery),
+            dataProvider.query(countQuery)
         ]);
 
-        const totalItems = countResult.recordset[0].total;
+        const totalItems = countResult.rows[0].total;
 
         // Fetch chart config for this report
-        const chartsResult = await pool.request()
-            .input('reportId', sql.Int, config.id)
-            .query('SELECT chartType, chartTitle, xAxisColumn, yAxisColumns, xAxisLabel, yAxisLabel FROM ReportCharts WHERE reportId = @reportId');
+        const chartsResult = await p.query(
+            'SELECT chartType, chartTitle, xAxisColumn, yAxisColumns, xAxisLabel, yAxisLabel FROM ReportCharts WHERE reportId = @reportId',
+            { reportId: config.id }
+        );
 
         res.json({
             success: true,
-            data: result.recordset,
-            charts: chartsResult.recordset,
+            data: result.rows,
+            charts: chartsResult.rows,
             pagination: {
                 totalItems,
                 totalPages: Math.ceil(totalItems / limit),

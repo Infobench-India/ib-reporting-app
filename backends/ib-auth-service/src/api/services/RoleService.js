@@ -4,21 +4,21 @@ const { v4: uuidv4 } = require('uuid');
 
 class RoleService {
   static async getAllRoles() {
-    const pool = await getPool();
+    const p = await getPool();
 
     try {
       const query = `
         SELECT r.id, r.name, r.description, COUNT(p.id) as permissionCount
         FROM Roles r
-        LEFT JOIN RolePermissions rp ON r.id = rp.roleId
-        LEFT JOIN Permissions p ON rp.permissionId = p.id
-        WHERE r.isActive = 1
+        LEFT JOIN RolePermissions rp ON r.id = rp."roleId"
+        LEFT JOIN Permissions p ON rp."permissionId" = p.id
+        WHERE r."isActive" = 1
         GROUP BY r.id, r.name, r.description
         ORDER BY r.name;
       `;
 
-      const result = await pool.request().query(query);
-      return result.recordset || [];
+      const result = await p.query(query);
+      return result.rows || [];
     } catch (err) {
       logger.error('Get all roles failed:', err);
       throw err;
@@ -26,7 +26,7 @@ class RoleService {
   }
 
   static async getRoleById(roleId) {
-    const pool = await getPool();
+    const p = await getPool();
 
     try {
       const query = `
@@ -35,11 +35,9 @@ class RoleService {
         WHERE id = @roleId;
       `;
 
-      const result = await pool.request()
-        .input('roleId', roleId)
-        .query(query);
+      const result = await p.query(query, { roleId });
 
-      return result.recordset[0] || null;
+      return result.rows[0] || null;
     } catch (err) {
       logger.error('Get role by id failed:', err);
       throw err;
@@ -47,22 +45,20 @@ class RoleService {
   }
 
   static async getRolePermissions(roleId) {
-    const pool = await getPool();
+    const p = await getPool();
 
     try {
       const query = `
         SELECT p.id, p.name, p.description, p.action
         FROM Roles r
-        JOIN RolePermissions rp ON r.id = rp.roleId
-        JOIN Permissions p ON rp.permissionId = p.id
-        WHERE r.id = @roleId AND r.isActive = 1;
+        JOIN RolePermissions rp ON r.id = rp."roleId"
+        JOIN Permissions p ON rp."permissionId" = p.id
+        WHERE r.id = @roleId AND r."isActive" = 1;
       `;
 
-      const result = await pool.request()
-        .input('roleId', roleId)
-        .query(query);
+      const result = await p.query(query, { roleId });
 
-      return result.recordset || [];
+      return result.rows || [];
     } catch (err) {
       logger.error('Get role permissions failed:', err);
       throw err;
@@ -70,24 +66,23 @@ class RoleService {
   }
 
   static async createRole(name, description) {
-    const pool = await getPool();
+    const p = await getPool();
 
     try {
       const roleId = uuidv4();
       const query = `
-        INSERT INTO Roles (id, name, description, isActive, createdAt)
-        VALUES (@id, @name, @description, 1, GETDATE());
+        INSERT INTO Roles (id, name, description, "isActive", "createdAt")
+        VALUES (@id, @name, @description, 1, ${p.type === 'mssql' ? 'GETDATE()' : 'CURRENT_TIMESTAMP'});
       `;
 
-      const request = pool.request();
-      request.input('id', roleId);
-      request.input('name', name);
-      request.input('description', description);
-
-      await request.query(query);
+      await p.query(query, {
+        id: roleId,
+        name,
+        description
+      });
       logger.info(`Role created: ${name}`);
 
-      return { id: roleId, name, description, isActive: true };
+      return { id: roleId, name, description, isActive: 1 };
     } catch (err) {
       logger.error('Create role failed:', err);
       throw err;
@@ -95,23 +90,21 @@ class RoleService {
   }
 
   static async assignPermissionToRole(roleId, permissionId) {
-    const pool = await getPool();
+    const p = await getPool();
 
     try {
-      const query = `
-        IF NOT EXISTS (SELECT 1 FROM RolePermissions WHERE roleId = @roleId AND permissionId = @permissionId)
-        BEGIN
-          INSERT INTO RolePermissions (roleId, permissionId, createdAt)
-          VALUES (@roleId, @permissionId, GETDATE());
-        END;
-      `;
+      // Check then insert for portability
+      const checkQuery = `SELECT 1 FROM RolePermissions WHERE roleId = @roleId AND permissionId = @permissionId`;
+      const checkRes = await p.query(checkQuery, { roleId, permissionId });
 
-      const request = pool.request();
-      request.input('roleId', roleId);
-      request.input('permissionId', permissionId);
-
-      await request.query(query);
-      logger.info(`Permission assigned to role: ${roleId}`);
+      if (checkRes.rows.length === 0) {
+        const query = `
+          INSERT INTO RolePermissions ("roleId", "permissionId", "createdAt")
+          VALUES (@roleId, @permissionId, ${p.type === 'mssql' ? 'GETDATE()' : 'CURRENT_TIMESTAMP'});
+        `;
+        await p.query(query, { roleId, permissionId });
+        logger.info(`Permission assigned to role: ${roleId}`);
+      }
     } catch (err) {
       logger.error('Assign permission to role failed:', err);
       throw err;
@@ -119,7 +112,7 @@ class RoleService {
   }
 
   static async removePermissionFromRole(roleId, permissionId) {
-    const pool = await getPool();
+    const p = await getPool();
 
     try {
       const query = `
@@ -127,11 +120,7 @@ class RoleService {
         WHERE roleId = @roleId AND permissionId = @permissionId;
       `;
 
-      const request = pool.request();
-      request.input('roleId', roleId);
-      request.input('permissionId', permissionId);
-
-      await request.query(query);
+      await p.query(query, { roleId, permissionId });
       logger.info(`Permission removed from role: ${roleId}`);
     } catch (err) {
       logger.error('Remove permission from role failed:', err);
@@ -140,24 +129,23 @@ class RoleService {
   }
 
   static async updateRole(roleId, updates) {
-    const pool = await getPool();
+    const p = await getPool();
     try {
       const allowedFields = ['name', 'description', 'isActive'];
       const setClauses = [];
-      const request = pool.request();
-      request.input('roleId', roleId);
+      const params = { roleId };
 
       for (const [key, value] of Object.entries(updates)) {
         if (allowedFields.includes(key)) {
           setClauses.push(`${key} = @${key}`);
-          request.input(key, value);
+          params[key] = value;
         }
       }
 
       if (setClauses.length === 0) return;
 
-      const query = `UPDATE Roles SET ${setClauses.join(', ')}, updatedAt = GETDATE() WHERE id = @roleId;`;
-      await request.query(query);
+      const query = `UPDATE Roles SET ${setClauses.join(', ')}, updatedAt = ${p.type === 'mssql' ? 'GETDATE()' : 'CURRENT_TIMESTAMP'} WHERE id = @roleId;`;
+      await p.query(query, params);
       logger.info(`Role updated: ${roleId}`);
     } catch (err) {
       logger.error('Update role failed:', err);

@@ -20,13 +20,7 @@ const getAll = createAsyncThunk('dashboard/getAll', async (params: IDashboardPar
     const response = await API.get(`${VITE_SYSTEM_MES_API_URL}/api/productiondata/dashboard?${queryParams.toString()}`);
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      dispatch(setError({ message: error.response?.data.errors || 'Failed to get dashboard data', type: 'error' }));
-      // throw new ApiError(error.response?.data.errors || 'Failed to get data', error.response?.status || 500);
-    } else {
-      dispatch(setError({ message: 'An unexpected error occurred', type: 'error' }));
-      // throw new ApiError('An unexpected error occurred', 500);
-    }
+    throw error;
   }
 });
 

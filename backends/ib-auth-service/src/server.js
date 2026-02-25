@@ -12,6 +12,7 @@ const cookieParser = require('cookie-parser');
 const logger = require('./main/common/logger');
 const config = require('./config');
 const activationService = require('./services/activationService');
+const { initializeDatabase } = require('./utils/init-db');
 
 const app = express();
 const PORT = config.port;
@@ -75,6 +76,8 @@ app.use((err, req, res, next) => {
 if (require.main === module) {
   app.listen(PORT, () => {
     logger.info(`Authentication Service running on port ${PORT}`);
+    // Auto-initialize DB schema on startup (non-blocking)
+    initializeDatabase().catch(err => logger.error('DB init failed:', err.message));
   });
 }
 

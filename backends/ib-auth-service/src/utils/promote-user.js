@@ -13,22 +13,19 @@ async function promoteUser() {
     try {
         logger.info(`Attempting to promote user ${email} to Admin...`);
         const pool = await getPool();
-        const request = pool.request();
 
         // Find the Admin role ID
-        const roleResult = await request.query("SELECT id FROM Roles WHERE name = 'Admin'");
-        if (roleResult.recordset.length === 0) {
+        const roleResult = await pool.query("SELECT id FROM Roles WHERE name = 'Admin'");
+        console.log(roleResult);
+        if (roleResult.rows.length === 0) {
             throw new Error("Admin role not found in database. Please run 'yarn init-db' first.");
         }
-        const adminRoleId = roleResult.recordset[0].id;
+        const adminRoleId = roleResult.rows[0].id;
 
         // Update the user's role
-        request.input('email', email);
-        request.input('roleId', adminRoleId);
-
-        const updateResult = await request.query("UPDATE Users SET roleId = @roleId WHERE email = @email");
-
-        if (updateResult.rowsAffected[0] === 0) {
+        const updateResult = await pool.query(`UPDATE Users SET "roleId" = @roleId WHERE email = @email`, { email, roleId: adminRoleId });
+        console.log(updateResult);
+        if (updateResult?.rowsAffected?.[0] === 0) {
             logger.error(`User with email ${email} not found.`);
             process.exit(1);
         }

@@ -22,9 +22,8 @@ const getAll = createAsyncThunk('results/getAll', async (params: IFetchParams, {
     }
     const response = await API.get(`/results?${queryParams.toString()}`);
     return response.data;
-  } catch (error : any) {
-   dispatch(setError(error.message || 'Failed to get results'));
-       throw error; // Rethrow the error for further handling if needed
+  } catch (error: any) {
+    throw error; // Rethrow the error for further handling if needed
   }
 });
 
@@ -92,9 +91,8 @@ const search = createAsyncThunk('results/search', async (params: IFetchParams, {
 
     const response = await API.get(`/results/search?${queryParams.toString()}`);
     return response.data;
-  } catch (error : any) {
-   dispatch(setError(error.message || 'Failed to get results'));
-       throw error; // Rethrow the error for further handling if needed
+  } catch (error: any) {
+    throw error; // Rethrow the error for further handling if needed
   }
 });
 
@@ -102,9 +100,8 @@ const get = createAsyncThunk('results/get', async (id: string, { dispatch }) => 
   try {
     const response = await API.get(`/results/${id}`);
     return response.data;
-  } catch (error : any) {
-   dispatch(setError(error.message || 'Failed to get results'));
-       throw error; // Rethrow the error for further handling if needed
+  } catch (error: any) {
+    throw error; // Rethrow the error for further handling if needed
   }
 });
 
@@ -112,9 +109,8 @@ const create = createAsyncThunk('results/create', async (data: any, { dispatch }
   try {
     const response = await API.post('/results', data);
     return response.data;
-  } catch (error : any) {
-   dispatch(setError(error.message || 'Failed to get results'));
-       throw error; // Rethrow the error for further handling if needed
+  } catch (error: any) {
+    throw error; // Rethrow the error for further handling if needed
   }
 });
 
@@ -122,9 +118,8 @@ const update = createAsyncThunk('results/update', async ({ id, data }: { id: str
   try {
     const response = await API.put(`/results/${id}`, data);
     return response.data;
-  } catch (error : any) {
-   dispatch(setError(error.message || 'Failed to get results'));
-       throw error; // Rethrow the error for further handling if needed
+  } catch (error: any) {
+    throw error; // Rethrow the error for further handling if needed
   }
 });
 
@@ -132,9 +127,8 @@ const remove = createAsyncThunk('results/remove', async (id: string, { dispatch 
   try {
     const response = await API.delete(`/results/${id}`);
     return response.data;
-  }catch (error : any) {
-   dispatch(setError(error.message || 'Failed to get results'));
-       throw error; // Rethrow the error for further handling if needed
+  } catch (error: any) {
+    throw error; // Rethrow the error for further handling if needed
   }
 });
 
@@ -157,8 +151,8 @@ const ResultService = {
   get,
   update,
   remove,
- findByVIN,
- exportResults
+  findByVIN,
+  exportResults
 };
 
 export default ResultService;

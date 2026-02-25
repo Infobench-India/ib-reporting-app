@@ -78,9 +78,7 @@ const create = createAsyncThunk('scheduleConfig/create', async (data: any, { dis
   try {
     const response = await API.post('/schedule-config', data);
     return response.data;
-  } catch (error:any) {
-    dispatch(setError(error.response?.data.errors || error.response?.data.message || 'Failed to create data'));
-    
+  } catch (error: any) {
     if (axios.isAxiosError(error)) {
       throw new ApiError(error.response?.data.errors || 'Failed to create data', error.response?.status || 500);
     } else {

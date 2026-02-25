@@ -48,7 +48,7 @@ class AuthController {
       if (!user) {
         return res.status(401).json({ error: 'Invalid credentials' });
       }
-
+      console.log(user);
       if (!user.isActive) {
         return res.status(403).json({ error: 'User account is inactive' });
       }

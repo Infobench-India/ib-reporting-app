@@ -52,9 +52,7 @@ const create = createAsyncThunk('shiftdata/create', async (data: any, { dispatch
   try {
     const response = await API.post('/productionshifts', data);
     return response.data;
-  } catch (error:any) {
-    dispatch(setError(error.response?.data.errors || error.response?.data.message || 'Failed to create shift data'));
-    
+  } catch (error: any) {
     if (axios.isAxiosError(error)) {
       throw new ApiError(error.response?.data.errors || 'Failed to create shift data', error.response?.status || 500);
     } else {

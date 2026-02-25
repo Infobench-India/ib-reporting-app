@@ -23,7 +23,6 @@ export const getAll = createAsyncThunk('eventsState/getAll', async (params: IFet
     const response = await API.get(`/events?${queryParams.toString()}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.message || 'Failed to get events'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -33,7 +32,6 @@ export const findByDate = createAsyncThunk('eventsState/findByDate', async (time
     const response = await API.get(`/events?timespan=${timespan}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.message || 'Failed to find events by date'));
     throw error; // Rethrow the error for further handling if needed
   }
 });

@@ -1,36 +1,36 @@
-import {createAsyncThunk} from '@reduxjs/toolkit';
+import { createAsyncThunk } from '@reduxjs/toolkit';
 import API from '../../../util/axiosWrapper';
 import { ApiError } from 'src/util/ApiError';
 import axios from 'axios';
-import type {IFetchParams} from '../../../types/customTypes';
-import {setError} from '../../../redux/errorSlice';
+import type { IFetchParams } from '../../../types/customTypes';
+import { setError } from '../../../redux/errorSlice';
 
 // Thunk to get all Production data
 const getAll = createAsyncThunk('productiondata/getAll', async (params: IFetchParams) => {
-    try {
-        const {page = 1, limit = 50, sort, filter} = params;
+  try {
+    const { page = 1, limit = 50, sort, filter } = params;
 
-        const queryparams: URLSearchParams = new URLSearchParams();
-        queryparams.append('page', String(page));
-        queryparams.append('limit', String(limit));
+    const queryparams: URLSearchParams = new URLSearchParams();
+    queryparams.append('page', String(page));
+    queryparams.append('limit', String(limit));
 
-        if(sort) {
-            queryparams.append('sort', sort);
-        }
-        if(filter) {
-            queryparams.append('filter', JSON.stringify(Object.entries(filter).map(([Key, value])=>({id: Key, value}))));
-
-        }
-        const response = await API.get('/productiondatas?' + queryparams.toString());
-        return response.data;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            throw new ApiError(error.response?.data.errors || 'Failed to get Production data', error.response?.status || 500);
-        }
-        else {
-            throw new ApiError('An unexpected error occurred', 500);
-        }
+    if (sort) {
+      queryparams.append('sort', sort);
     }
+    if (filter) {
+      queryparams.append('filter', JSON.stringify(Object.entries(filter).map(([Key, value]) => ({ id: Key, value }))));
+
+    }
+    const response = await API.get('/productiondatas?' + queryparams.toString());
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new ApiError(error.response?.data.errors || 'Failed to get Production data', error.response?.status || 500);
+    }
+    else {
+      throw new ApiError('An unexpected error occurred', 500);
+    }
+  }
 })
 
 // Thunk to get Production data by ID
@@ -52,9 +52,7 @@ const create = createAsyncThunk('productiondata/create', async (data: any, { dis
   try {
     const response = await API.post('/productiondatas', data);
     return response.data;
-  } catch (error:any) {
-    dispatch(setError(error.response?.data.errors || error.response?.data.message || 'Failed to create Production data'));
-
+  } catch (error: any) {
     if (axios.isAxiosError(error)) {
       throw new ApiError(error.response?.data.errors || 'Failed to create Production data', error.response?.status || 500);
     } else {

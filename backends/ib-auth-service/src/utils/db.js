@@ -1,8 +1,8 @@
-const sql = require('mssql');
+const { createProvider } = require('./dbProvider');
 const config = require('../config');
 const logger = require('../main/common/logger');
 
-let pool;
+let provider;
 
 function prepareConnectionString(connStr = '') {
   let sqlUri = (connStr || '').trim();
@@ -14,23 +14,18 @@ function prepareConnectionString(connStr = '') {
 
   const lowerUri = sqlUri.toLowerCase();
 
+  if (lowerUri.startsWith('postgres://') || lowerUri.startsWith('postgresql://')) {
+    return { isPostgres: true, sqlUri };
+  }
+
   const isTrusted =
     lowerUri.includes('trusted_connection=true') ||
     lowerUri.includes('trusted_connection=yes') ||
     lowerUri.includes('integrated security=sspi') ||
     (!lowerUri.includes('user id=') && !lowerUri.includes('uid='));
 
-  if (isTrusted && !lowerUri.includes('driver=')) {
-    sqlUri = `Driver={ODBC Driver 17 for SQL Server};${sqlUri}`;
-  }
-
   if (lowerUri.includes('trusted_connection=true')) {
     sqlUri = sqlUri.replace(/trusted_connection=true/gi, 'Trusted_Connection=yes');
-  } else if (isTrusted &&
-    !lowerUri.includes('trusted_connection=') &&
-    !lowerUri.includes('integrated security=')) {
-    if (!sqlUri.endsWith(';')) sqlUri += ';';
-    sqlUri += 'Trusted_Connection=yes;';
   }
 
   const serverMatch = sqlUri.match(/(?:Server|Data Source)=([^;]+)/i);
@@ -43,48 +38,53 @@ function prepareConnectionString(connStr = '') {
   const user = userMatch ? userMatch[1].trim() : '';
   const password = pwdMatch ? pwdMatch[1].trim() : '';
 
-  return { sqlUri, isTrusted, server, database, user, password };
+  return { isPostgres: false, sqlUri, isTrusted, server, database, user, password };
 }
 
 const getPool = async (connString = null) => {
   const targetConnStr = connString || config.sqlUri;
 
-  if (!connString && pool) return pool;
+  if (!connString && provider) return provider;
 
   try {
-    const { database, server, isTrusted, user, password } = prepareConnectionString(targetConnStr);
-
-    // Split ServerName\Instance for tedious compatibility
-    let [host, instanceName] = server.split('\\');
-
-    if (isTrusted) {
-      logger.warn('Windows Authentication (Trusted_Connection) detected. The standalone driver often requires SQL Authentication (User ID & Password) to work correctly in the packaged .exe.');
+    let p;
+    if (!targetConnStr && config.dbConfig && config.dbConfig.database) {
+      // Use discrete config from env vars
+      p = createProvider(config.dbConfig);
+    } else {
+      const info = prepareConnectionString(targetConnStr);
+      if (info.isPostgres) {
+        p = createProvider({ url: info.sqlUri });
+      } else {
+        let [host, instanceName] = (info.server || '').split('\\');
+        // Keep the original hostname for named instances so that tedious can
+        // contact SQL Server Browser (UDP 1434) to resolve the instance port.
+        const cleanHost = host || 'localhost';
+        const mssqlConfig = {
+          server: cleanHost,
+          database: info.database,
+          user: info.user,
+          password: info.password,
+          options: {
+            encrypt: false,
+            trustServerCertificate: true,
+          }
+        };
+        if (instanceName) {
+          mssqlConfig.options.instanceName = instanceName;
+        }
+        p = createProvider(mssqlConfig);
+      }
     }
 
-    // Try to resolve host to local IP if it looks like the current machine
-    const cleanHost = (host.toLowerCase() === 'desktop-n16jdj5' || host.toLowerCase() === 'localhost') ? '127.0.0.1' : host;
-
-    logger.info(`Attempting DB Connection: Host=[${cleanHost}], Instance=[${instanceName || 'default'}], Database=[${database}]`);
-
-    const newPool = await new sql.ConnectionPool({
-      server: host,
-      database: database,
-      user: user,
-      password: password,
-      options: {
-        encrypt: false,
-        trustServerCertificate: true, // Trust the server certificate regardless of trust chain
-        instanceName: instanceName,
-        connectTimeout: 30000 // 30 seconds
-      }
-    }).connect();
+    await p.connect();
 
     if (!connString) {
-      pool = newPool;
-      logger.info(`Connected to Auth Service SQL Database (${isTrusted ? 'Windows Auth' : 'SQL Auth'})`);
+      provider = p;
+      logger.info(`Connected to Auth Database (${p.type.toUpperCase()})`);
     }
 
-    return newPool;
+    return p;
   } catch (err) {
     logger.error(`Database Connection Failed: `, err);
     throw err;
@@ -92,9 +92,9 @@ const getPool = async (connString = null) => {
 };
 
 const closePool = async () => {
-  if (pool) {
-    await pool.close();
-    pool = null;
+  if (provider && provider.pool && provider.pool.close) {
+    await provider.pool.close();
+    provider = null;
     logger.info('Database pool closed');
   }
 };

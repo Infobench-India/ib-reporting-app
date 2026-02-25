@@ -25,7 +25,6 @@ export const getAll = createAsyncThunk('breakdownsState/getAll', async (params: 
     const response = await API.get(`/breakdowns?${queryParams.toString()}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.message || 'Failed to fetch breakdowns'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -61,7 +60,6 @@ export const get = createAsyncThunk('breakdownsState/get', async (tool: any, { d
     const response = await API.get(`/breakdowns/${tool}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.message || 'Failed to fetch breakdown'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -71,7 +69,6 @@ export const create = createAsyncThunk('breakdownsState/create', async (data: an
     const response = await API.post("/breakdowns", data);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.message || 'Failed to create breakdown'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -81,7 +78,6 @@ export const update = createAsyncThunk('breakdownsState/update', async (query: a
     const response = await API.put(`/breakdowns/${query.id}`, query.data);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.message || 'Failed to update breakdown'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -91,7 +87,6 @@ export const updatebyname = createAsyncThunk('breakdownsState/updatebyname', asy
     const response = await API.put(`/breakdowns/${query.name}`, query.data);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.message || 'Failed to update breakdown'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -101,7 +96,6 @@ export const remove = createAsyncThunk('breakdownsState/remove', async (id: any,
     const response = await API.delete(`/breakdowns/${id}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.message || 'Failed to delete breakdown'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -111,7 +105,6 @@ export const findByDate = createAsyncThunk('breakdownsState/findByDate', async (
     const response = await API.get(`/breakdowns?timespan=${timespan}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.message || 'Failed to fetch breakdowns'));
     throw error; // Rethrow the error for further handling if needed
   }
 });

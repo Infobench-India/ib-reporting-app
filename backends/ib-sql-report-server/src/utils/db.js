@@ -1,9 +1,9 @@
-const sql = require('mssql');
+const { createProvider } = require('./dbProvider');
 const config = require('../config');
 const logger = require('../main/common/logger');
 
-let pool;
-const dynamicPools = new Map();
+let provider;
+const dynamicProviders = new Map();
 
 /**
  * Processes connection string to ensure required drivers and trusted connection flags are present
@@ -19,26 +19,21 @@ function prepareConnectionString(connStr = '') {
 
     const lowerUri = sqlUri.toLowerCase();
 
-    // 2. Detect Windows auth
+    // Handle Postgres strings early
+    if (lowerUri.startsWith('postgres://') || lowerUri.startsWith('postgresql://')) {
+        return { isPostgres: true, sqlUri };
+    }
+
+    // 2. Detect Windows auth (MSSQL only)
     const isTrusted =
         lowerUri.includes('trusted_connection=true') ||
         lowerUri.includes('trusted_connection=yes') ||
         lowerUri.includes('integrated security=sspi') ||
         (!lowerUri.includes('user id=') && !lowerUri.includes('uid='));
 
-    // 3. Ensure ODBC driver clause (only if you still want the ODBC string)
-    if (isTrusted && !lowerUri.includes('driver=')) {
-        sqlUri = `Driver={ODBC Driver 17 for SQL Server};${sqlUri}`;
-    }
-
-    // 4. Normalize Trusted_Connection=yes
+    // 3. Normalize Trusted_Connection=yes
     if (lowerUri.includes('trusted_connection=true')) {
         sqlUri = sqlUri.replace(/trusted_connection=true/gi, 'Trusted_Connection=yes');
-    } else if (isTrusted &&
-        !lowerUri.includes('trusted_connection=') &&
-        !lowerUri.includes('integrated security=')) {
-        if (!sqlUri.endsWith(';')) sqlUri += ';';
-        sqlUri += 'Trusted_Connection=yes;';
     }
 
     // 5. Extract Server, Database, User and Password
@@ -52,216 +47,222 @@ function prepareConnectionString(connStr = '') {
     const user = userMatch ? userMatch[1].trim() : '';
     const password = pwdMatch ? pwdMatch[1].trim() : '';
 
-    return { sqlUri, isTrusted, server, database, user, password };
+    return { isPostgres: false, sqlUri, isTrusted, server, database, user, password };
 }
 
 const getPool = async (connString = null) => {
-    // If no connString provided, use default config URI
     const targetConnStr = connString || config.sqlUri;
-    // Check main pool if using default
-    if (!connString && pool) return pool;
-    // Check dynamic pools
-    if (connString && dynamicPools.has(connString)) return dynamicPools.get(connString);
+
+    if (!connString && provider) return provider;
+    if (connString && dynamicProviders.has(connString)) return dynamicProviders.get(connString);
 
     try {
-        const { database, server, isTrusted, user, password } = prepareConnectionString(targetConnStr);
-
-        // Split ServerName\Instance for tedious compatibility
-        let [host, instanceName] = server.split('\\');
-
-        if (isTrusted) {
-            logger.warn('Windows Authentication detected. The standalone driver requires SQL Authentication (User ID & Password) for the packaged .exe.');
+        let p;
+        if (!targetConnStr && config.dbConfig && config.dbConfig.database) {
+            // Use discrete config from env vars
+            p = createProvider(config.dbConfig);
+        } else {
+            const info = prepareConnectionString(targetConnStr);
+            if (info.isPostgres) {
+                p = createProvider({ url: info.sqlUri });
+            } else {
+                let [host, instanceName] = (info.server || '').split('\\');
+                // Keep the original hostname for named instances so that tedious can
+                // contact SQL Server Browser (UDP 1434) to resolve the instance port.
+                // Replacing with '127.0.0.1' breaks auto-discovery for named instances.
+                const cleanHost = host || 'localhost';
+                const mssqlConfig = {
+                    server: cleanHost,
+                    database: info.database,
+                    user: info.user,
+                    password: info.password,
+                    options: {
+                        encrypt: false,
+                        trustServerCertificate: true,
+                    }
+                };
+                if (instanceName) {
+                    mssqlConfig.options.instanceName = instanceName;
+                }
+                p = createProvider(mssqlConfig);
+            }
         }
 
-        // Host resolution for local connections
-        const cleanHost = (host.toLowerCase() === 'desktop-n16jdj5' || host.toLowerCase() === 'localhost') ? '127.0.0.1' : host;
-
-        const newPool = await new sql.ConnectionPool({
-            server: cleanHost,
-            database: database,
-            user: user,
-            password: password,
-            options: {
-                encrypt: false,
-                trustServerCertificate: true,
-                instanceName: instanceName,
-                requestTimeout: 60000,
-                connectionTimeout: 60000
-            }
-        }).connect();
+        await p.connect();
 
         if (!connString) {
-            pool = newPool;
-            logger.info(`Connected to Config SQL Database (${isTrusted ? 'Windows Auth' : 'SQL Auth'})`);
+            provider = p;
+            logger.info(`Connected to Config Database (${p.type.toUpperCase()})`);
         } else {
-            dynamicPools.set(connString, newPool);
-            logger.info(`New dynamic pool created for report (${isTrusted ? 'Windows Auth' : 'SQL Auth'})`);
+            dynamicProviders.set(connString, p);
+            logger.info(`New dynamic provider created (${p.type.toUpperCase()})`);
         }
 
-        return newPool;
+        return p;
     } catch (err) {
-        logger.error(`Database Connection Failed for ${connString ? 'dynamic pool' : 'Config DB'}: `, err);
+        logger.error(`Database Connection Failed: `, err);
         throw err;
     }
 };
 
-const ensureReportTable = async (pool, tableName, columnsString) => {
+const ensureReportTable = async (p, tableName, columnsString) => {
     try {
-        let cleanTableName = (tableName || '').trim();
-        // Strip existing brackets if any for normalized check
-        if (cleanTableName.startsWith('[') && cleanTableName.endsWith(']')) {
-            cleanTableName = cleanTableName.slice(1, -1);
+        const cleanTableName = (tableName || '').trim().replace(/[\[\]"]/g, '');
+        if (!cleanTableName) return;
+
+        // Dialect specific check
+        let query;
+        if (p.type === 'mssql') {
+            query = "SELECT * FROM sys.tables WHERE name = @tableName";
+        } else {
+            query = "SELECT table_name FROM information_schema.tables WHERE table_name = @tableName";
         }
 
-        const lowerTableName = cleanTableName.toLowerCase();
-        if (!lowerTableName) return;
+        const checkRes = await p.query(query, { tableName: cleanTableName });
 
-        // Skip check for core tables
-        if (['reportsettings', 'reportconfigs', 'reportsumitems'].includes(lowerTableName)) {
-            return;
-        }
-
-        const checkRes = await pool.request()
-            .input('tableName', sql.NVarChar, tableName)
-            .query("SELECT * FROM sys.tables WHERE name = @tableName");
-
-        if (checkRes.recordset.length === 0) {
-            logger.info(`Creating missing report data table: ${tableName}`);
-
-            // Expected columns format: "Col1,Col2,Col3"
+        if (checkRes.rows.length === 0) {
             const columns = (columnsString || '').split(',')
                 .map(col => col.trim())
                 .filter(col => col.length > 0);
 
-            if (columns.length === 0) {
-                logger.warn(`No columns defined for table ${cleanTableName}. Cannot create.`);
-                return;
-            }
+            if (columns.length === 0) return;
 
-            // Create table with NVARCHAR(MAX) for all columns to be safe
-            const colDefs = columns.map(col => `[${col}] NVARCHAR(MAX)`).join(', ');
-            const createQuery = `CREATE TABLE [${cleanTableName}] (id INT PRIMARY KEY IDENTITY(1,1), ${colDefs})`;
+            const colType = p.type === 'mssql' ? 'NVARCHAR(MAX)' : 'TEXT';
+            const colDefs = columns.map(col => `${p.escapeIdentifier(col)} ${colType}`).join(', ');
+            const createQuery = `CREATE TABLE ${p.escapeIdentifier(cleanTableName)} (${p.getIdentityType()}, ${colDefs})`;
 
-            await pool.request().query(createQuery);
-            logger.info(`Table ${cleanTableName} created successfully.`);
+            await p.query(createQuery);
+            logger.info(`Table ${cleanTableName} created successfully (${p.type}).`);
         }
     } catch (err) {
         logger.error(`Error ensuring report table ${tableName}:`, err);
-        // We don't throw here to avoid blocking execution if it's just a check failure, 
-        // but the calling function might fail later if table is truly missing.
     }
 };
 
 const ensureTables = async (ConnectionString) => {
     try {
-        const configPool = await getPool(ConnectionString); // Gets default pool
-        logger.info('Ensuring database tables exist...');
+        const p = await getPool(ConnectionString);
+        logger.info(`Ensuring database tables exist (${p.type})...`);
 
-        await configPool.request().query(`
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ReportSettings')
-            BEGIN
-                CREATE TABLE ReportSettings (
-                    id INT PRIMARY KEY IDENTITY(1,1),
-                    exportFolder NVARCHAR(MAX),
-                    ConnectionString NVARCHAR(MAX),
-                    ConnectionString1 NVARCHAR(MAX),
-                    ConnectionString2 NVARCHAR(MAX),
-                    AlarmReportConnectionString NVARCHAR(MAX)
-                );
-            END
+        const isMssql = p.type === 'mssql';
+        const type_id = p.getIdentityType();
+        const type_text = isMssql ? 'NVARCHAR(MAX)' : 'TEXT';
+        const type_string = isMssql ? 'NVARCHAR(255)' : 'VARCHAR(255)';
+        const type_timestamp = p.getTimestampType();
+        const type_bit = isMssql ? 'BIT' : 'BOOLEAN';
 
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ReportConfigs')
-            BEGIN
-                CREATE TABLE ReportConfigs (
-                    id INT PRIMARY KEY IDENTITY(1,1),
-                    category NVARCHAR(255) NOT NULL,
-                    name NVARCHAR(255) NOT NULL UNIQUE,
-                    tableName NVARCHAR(255) NOT NULL,
-                    templateName NVARCHAR(255) NOT NULL,
-                    columns NVARCHAR(MAX),
-                    connectionString NVARCHAR(MAX) NOT NULL,
-                    query NVARCHAR(MAX) NOT NULL,
-                    maxRowPerPage INT DEFAULT 0,
-                    maxAvailableRowPerPage INT DEFAULT 0,
-                    sumStartColumnNumber INT DEFAULT 0,
-                    maxSumStartColumnNumber INT DEFAULT 0,
-                    reportHeaderBlankRowCount INT DEFAULT 0,
-                    reportHeaderStartRowNo INT DEFAULT 0,
-                    reportHeaderRowCount INT DEFAULT 0,
-                    tableHeaderStartRowNo INT DEFAULT 0,
-                    tableHeaderRowCount INT DEFAULT 0,
-                    reportDateRow INT DEFAULT 0,
-                    reportDateColumn INT DEFAULT 0,
-                    fromDateRow INT DEFAULT 0,
-                    fromDateColumn INT DEFAULT 0,
-                    toDateRow INT DEFAULT 0,
-                    toDateColumn INT DEFAULT 0,
-                    footerRowCount INT DEFAULT 0,
-                    isGraphSupported BIT DEFAULT 0,
-                    isTabularSupported BIT DEFAULT 0,
-                    createdAt DATETIME DEFAULT GETDATE(),
-                    updatedAt DATETIME DEFAULT GETDATE()
-                );
-            END
+        const tableQuery = (name, schema) => {
+            if (isMssql) {
+                return `IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = '${name}') BEGIN ${schema} END`;
+            } else {
+                return schema.replace('CREATE TABLE', 'CREATE TABLE IF NOT EXISTS');
+            }
+        };
 
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ReportSumItems')
-            BEGIN
-                CREATE TABLE ReportSumItems (
-                    id INT PRIMARY KEY IDENTITY(1,1),
-                    reportId INT FOREIGN KEY REFERENCES ReportConfigs(id) ON DELETE CASCADE,
-                    query NVARCHAR(MAX) NOT NULL,
-                    dataRow INT NOT NULL,
-                    dataColumn INT NOT NULL
-                );
-            END
+        // 1. ReportSettings
+        await p.query(tableQuery('ReportSettings', `
+            CREATE TABLE ReportSettings (
+                id ${type_id},
+                exportFolder ${type_text},
+                ConnectionString ${type_text},
+                ConnectionString1 ${type_text},
+                ConnectionString2 ${type_text},
+                AlarmReportConnectionString ${type_text}
+            )
+        `));
 
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ReportCharts')
-            BEGIN
-                CREATE TABLE ReportCharts (
-                    id INT PRIMARY KEY IDENTITY(1,1),
-                    reportId INT FOREIGN KEY REFERENCES ReportConfigs(id) ON DELETE CASCADE,
-                    chartType NVARCHAR(50) NOT NULL, -- e.g., 'bar', 'line', 'pie'
-                    chartTitle NVARCHAR(255),
-                    xAxisColumn NVARCHAR(255),
-                    yAxisColumns NVARCHAR(MAX), -- Comma-separated list of columns for y-axis
-                    xAxisLabel NVARCHAR(255),
-                    yAxisLabel NVARCHAR(255),
-                    createdAt DATETIME DEFAULT GETDATE(),
-                    updatedAt DATETIME DEFAULT GETDATE()
-                );
-            END
+        // 2. ReportConfigs
+        await p.query(tableQuery('ReportConfigs', `
+            CREATE TABLE ReportConfigs (
+                id ${type_id},
+                category ${type_string} NOT NULL,
+                name ${type_string} NOT NULL UNIQUE,
+                tableName ${type_string} NOT NULL,
+                templateName ${type_string} NOT NULL,
+                ${p.escapeIdentifier('columns')} ${type_text},
+                connectionString ${type_text} NOT NULL,
+                ${p.escapeIdentifier('query')} ${type_text} NOT NULL,
+                maxRowPerPage INT DEFAULT 0,
+                maxAvailableRowPerPage INT DEFAULT 0,
+                sumStartColumnNumber INT DEFAULT 0,
+                maxSumStartColumnNumber INT DEFAULT 0,
+                reportHeaderBlankRowCount INT DEFAULT 0,
+                reportHeaderStartRowNo INT DEFAULT 0,
+                reportHeaderRowCount INT DEFAULT 0,
+                tableHeaderStartRowNo INT DEFAULT 0,
+                tableHeaderRowCount INT DEFAULT 0,
+                reportDateRow INT DEFAULT 0,
+                reportDateColumn INT DEFAULT 0,
+                fromDateRow INT DEFAULT 0,
+                fromDateColumn INT DEFAULT 0,
+                toDateRow INT DEFAULT 0,
+                toDateColumn INT DEFAULT 0,
+                footerRowCount INT DEFAULT 0,
+                isGraphSupported ${type_bit} DEFAULT ${isMssql ? 0 : 'FALSE'},
+                isTabularSupported ${type_bit} DEFAULT ${isMssql ? 0 : 'FALSE'},
+                createdAt ${type_timestamp},
+                updatedAt ${type_timestamp}
+            )
+        `));
 
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ReportSchedules')
-            BEGIN
-                CREATE TABLE ReportSchedules (
-    id INT PRIMARY KEY IDENTITY(1,1),
-    reportId INT FOREIGN KEY REFERENCES ReportConfigs(id) ON DELETE CASCADE UNIQUE,
-    name NVARCHAR(255) NOT NULL,
-    startDateTime DATETIME NOT NULL,
-    endDateTime DATETIME NOT NULL,
-    scheduleTime NVARCHAR(50) NOT NULL, -- "HH:mm"
-    recipients NVARCHAR(MAX) NOT NULL, -- Comma-separated emails
-    status NVARCHAR(50) DEFAULT 'Active', -- 'Active', 'Inactive'
-    nextExecution DATETIME,
-    createdAt DATETIME DEFAULT GETDATE(),
-    updatedAt DATETIME DEFAULT GETDATE()
-);
-            END
+        // 3. ReportSumItems
+        await p.query(tableQuery('ReportSumItems', `
+            CREATE TABLE ReportSumItems (
+                id ${type_id},
+                reportId INT ${isMssql ? 'FOREIGN KEY REFERENCES ReportConfigs(id) ON DELETE CASCADE' : 'REFERENCES ReportConfigs(id) ON DELETE CASCADE'},
+                ${p.escapeIdentifier('query')} ${type_text} NOT NULL,
+                dataRow INT NOT NULL,
+                dataColumn INT NOT NULL
+            )
+        `));
 
-            IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'ReportScheduleHistory')
-            BEGIN
-                CREATE TABLE ReportScheduleHistory (
-                    id INT PRIMARY KEY IDENTITY(1,1),
-                    scheduleId INT FOREIGN KEY REFERENCES ReportSchedules(id) ON DELETE CASCADE,
-                    executionTime DATETIME DEFAULT GETDATE(),
-                    status NVARCHAR(50), -- 'Success', 'Failure'
-                    attachment VARBINARY(MAX),
-                    fileName NVARCHAR(255),
-                    errorMessage NVARCHAR(MAX),
-                    createdAt DATETIME DEFAULT GETDATE()
-                );
-            END
-        `);
+        // 4. ReportCharts
+        await p.query(tableQuery('ReportCharts', `
+            CREATE TABLE ReportCharts (
+                id ${type_id},
+                reportId INT ${isMssql ? 'FOREIGN KEY REFERENCES ReportConfigs(id) ON DELETE CASCADE' : 'REFERENCES ReportConfigs(id) ON DELETE CASCADE'},
+                chartType ${p.type === 'mssql' ? 'NVARCHAR(50)' : 'VARCHAR(50)'} NOT NULL,
+                chartTitle ${type_string},
+                xAxisColumn ${type_string},
+                yAxisColumns ${type_text},
+                xAxisLabel ${type_string},
+                yAxisLabel ${type_string},
+                createdAt ${type_timestamp},
+                updatedAt ${type_timestamp}
+            )
+        `));
+
+        // 5. ReportSchedules
+        await p.query(tableQuery('ReportSchedules', `
+            CREATE TABLE ReportSchedules (
+                id ${type_id},
+                reportId INT ${isMssql ? 'FOREIGN KEY REFERENCES ReportConfigs(id) ON DELETE CASCADE UNIQUE' : 'REFERENCES ReportConfigs(id) ON DELETE CASCADE UNIQUE'},
+                name ${type_string} NOT NULL,
+                startDateTime ${isMssql ? 'DATETIME' : 'TIMESTAMP'} NOT NULL,
+                endDateTime ${isMssql ? 'DATETIME' : 'TIMESTAMP'} NOT NULL,
+                scheduleTime ${p.type === 'mssql' ? 'NVARCHAR(50)' : 'VARCHAR(50)'} NOT NULL,
+                recipients ${type_text} NOT NULL,
+                status ${p.type === 'mssql' ? 'NVARCHAR(50)' : 'VARCHAR(50)'} DEFAULT 'Active',
+                nextExecution ${isMssql ? 'DATETIME' : 'TIMESTAMP'},
+                createdAt ${type_timestamp},
+                updatedAt ${type_timestamp}
+            )
+        `));
+
+        // 6. ReportScheduleHistory
+        await p.query(tableQuery('ReportScheduleHistory', `
+            CREATE TABLE ReportScheduleHistory (
+                id ${type_id},
+                scheduleId INT ${isMssql ? 'FOREIGN KEY REFERENCES ReportSchedules(id) ON DELETE CASCADE' : 'REFERENCES ReportSchedules(id) ON DELETE CASCADE'},
+                executionTime ${type_timestamp},
+                status ${p.type === 'mssql' ? 'NVARCHAR(50)' : 'VARCHAR(50)'},
+                attachment ${p.type === 'mssql' ? 'VARBINARY(MAX)' : 'BYTEA'},
+                fileName ${type_string},
+                errorMessage ${type_text},
+                createdAt ${type_timestamp}
+            )
+        `));
+
         logger.info('Database tables verified/created successfully.');
     } catch (err) {
         logger.error('Error ensuring database tables:', err);
@@ -272,6 +273,5 @@ const ensureTables = async (ConnectionString) => {
 module.exports = {
     getPool,
     ensureTables,
-    ensureReportTable,
-    sql
+    ensureReportTable
 };

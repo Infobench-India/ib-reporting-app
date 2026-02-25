@@ -23,7 +23,6 @@ export const getAll = createAsyncThunk('partscansState/getAll', async (params: I
     const response = await API.get(`/partscans?${queryParams.toString()}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.response?.data.errors || 'Failed to get part scans'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -33,7 +32,6 @@ export const get = createAsyncThunk('partscansState/get', async (id: any, { disp
     const response = await API.get(`/partscans/${id}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.response?.data.errors || 'Failed to get part scan'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -42,7 +40,7 @@ export const create = createAsyncThunk('partscansState/create', async (data: any
   try {
     const response = await API.post("/partscans", data);
     return response.data;
-  }  catch (error) {
+  } catch (error) {
     if (axios.isAxiosError(error)) {
       throw new ApiError(error.response?.data.errors || 'Failed to create partscans data', error.response?.status || 500);
     } else {
@@ -55,7 +53,7 @@ export const update = createAsyncThunk('partscansState/update', async (query: an
   try {
     const response = await API.put(`/partscans/${query.id}`, query.data);
     return response.data;
-  }  catch (error) {
+  } catch (error) {
     if (axios.isAxiosError(error)) {
       throw new ApiError(error.response?.data.errors || 'Failed to update partscans data', error.response?.status || 500);
     } else {
@@ -69,7 +67,6 @@ export const remove = createAsyncThunk('partscansState/remove', async (id: any, 
     const response = await API.delete(`/partscans/${id}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.response?.data.errors || 'Failed to delete part scan'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -79,7 +76,6 @@ export const findBySKU = createAsyncThunk('partscansState/findBySKU', async (que
     const response = await API.get(`/partscans?sku=${query.sku}&stage=${query.stage}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.response?.data.errors || 'Failed to find part scans by SKU'));
     throw error; // Rethrow the error for further handling if needed
   }
 });

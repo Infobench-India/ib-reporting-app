@@ -23,7 +23,6 @@ export const getAll = createAsyncThunk('stageConfigsState/getAll', async (params
     const response = await API.get(`/stageconfigs?${queryParams.toString()}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.message || 'Failed to get stage configs'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -33,7 +32,6 @@ export const get = createAsyncThunk('stageConfigsState/get', async (id: any, { d
     const response = await API.get(`/stageconfigs/${id}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.message || 'Failed to get stage config'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -43,7 +41,6 @@ export const create = createAsyncThunk('stageConfigsState/create', async (data: 
     const response = await API.post("/stageconfigs", data);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.message || 'Failed to create stage config'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -53,7 +50,6 @@ export const update = createAsyncThunk('stageConfigsState/update', async (query:
     const response = await API.put(`/stageconfigs/${query.id}`, query.data);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.message || 'Failed to update stage config'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -63,7 +59,6 @@ export const updateToolStatus = createAsyncThunk('stageConfigsState/updateToolSt
     const response = await API.put(`/stageconfigs/toolstatus/${query.tool},${query.status}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.message || 'Failed to update tool status'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -73,7 +68,6 @@ export const updatePartStatus = createAsyncThunk('stageConfigsState/updatePartSt
     const response = await API.put(`/stageconfigs/partstatus/${query.part},${query.status}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.message || 'Failed to update part status'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -83,7 +77,6 @@ export const remove = createAsyncThunk('stageConfigsState/remove', async (id: an
     const response = await API.delete(`/stageconfigs/${id}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.message || 'Failed to delete stage config'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -93,7 +86,6 @@ export const removeSKU = createAsyncThunk('stageConfigsState/removeSKU', async (
     const response = await API.delete(`/stageconfigs/${sku}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.message || 'Failed to delete stage config by SKU'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -103,7 +95,6 @@ export const findByStage = createAsyncThunk('stageConfigsState/findByStage', asy
     const response = await API.get(`/stageconfigs?filter=${query.sku},${query.stage}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.message || 'Failed to find stage configs by stage'));
     throw error; // Rethrow the error for further handling if needed
   }
 });

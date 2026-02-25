@@ -95,7 +95,6 @@ const createConfig = createAsyncThunk('machineConfig/create', async (data: Machi
     const response = await API.post(baseUrl, data);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.response?.data?.errors || error.response?.data?.message || 'Failed to create machine config'));
     if (axios.isAxiosError(error)) {
       throw new ApiError(error.response?.data?.errors || 'Failed to create machine config', error.response?.status || 500);
     }

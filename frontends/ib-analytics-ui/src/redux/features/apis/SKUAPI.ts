@@ -78,9 +78,7 @@ const create = createAsyncThunk('skudata/create', async (data: any, { dispatch }
   try {
     const response = await API.post('/skudatas', data);
     return response.data;
-  } catch (error:any) {
-    dispatch(setError(error.response?.data.errors || error.response?.data.message || 'Failed to create SKU data'));
-    
+  } catch (error: any) {
     if (axios.isAxiosError(error)) {
       throw new ApiError(error.response?.data.errors || 'Failed to create SKU data', error.response?.status || 500);
     } else {

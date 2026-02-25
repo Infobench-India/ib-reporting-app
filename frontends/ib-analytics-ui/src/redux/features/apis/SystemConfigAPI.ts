@@ -25,8 +25,7 @@ export const getAll = createAsyncThunk('systemConfig/getAll', async (params: IFe
 
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.response?.data.errors || 'Failed to get systemconfigs'));
-    throw error; // Rethrow the error for further handling if needed
+    throw error;
   }
 });
 

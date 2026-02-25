@@ -23,7 +23,6 @@ export const getAll = createAsyncThunk('configGridsState/getAll', async (params:
     const response = await API.get(`/configrids?${queryParams.toString()}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.response?.data.errors || 'Failed to get config grids'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -33,7 +32,6 @@ export const get = createAsyncThunk('configGridsState/get', async (id: any, { di
     const response = await API.get(`/configrids/${id}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.response?.data.errors || 'Failed to get config grid'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -43,7 +41,6 @@ export const create = createAsyncThunk('configGridsState/create', async (data: a
     const response = await API.post("/configrids", data);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.response?.data.errors || 'Failed to create config grid'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -53,7 +50,6 @@ export const update = createAsyncThunk('configGridsState/update', async (query: 
     const response = await API.put(`/configrids/${query.id}`, query.data);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.response?.data.errors || 'Failed to update config grid'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -63,7 +59,6 @@ export const remove = createAsyncThunk('configGridsState/remove', async (id: any
     const response = await API.delete(`/configrids/${id}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.response?.data.errors || 'Failed to delete config grid'));
     throw error; // Rethrow the error for further handling if needed
   }
 });
@@ -73,7 +68,6 @@ export const findBySKU = createAsyncThunk('configGridsState/findBySKU', async (s
     const response = await API.get(`/configrids?sku=${sku}`);
     return response.data;
   } catch (error: any) {
-    dispatch(setError(error.response?.data.errors || 'Failed to find config grid by SKU'));
     throw error; // Rethrow the error for further handling if needed
   }
 });

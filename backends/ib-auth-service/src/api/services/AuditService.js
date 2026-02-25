@@ -4,25 +4,24 @@ const { v4: uuidv4 } = require('uuid');
 
 class AuditService {
   static async logAction(userId, action, resource, details = {}, ipAddress = null, statusCode = 200) {
-    const pool = await getPool();
+    const p = await getPool();
 
     try {
       const auditId = uuidv4();
       const query = `
-        INSERT INTO AuditLog (id, userId, action, resource, details, ipAddress, statusCode, createdAt)
-        VALUES (@id, @userId, @action, @resource, @details, @ipAddress, @statusCode, GETDATE());
+        INSERT INTO AuditLog (id, "userId", action, resource, details, "ipAddress", "statusCode", "createdAt")
+        VALUES (@id, @userId, @action, @resource, @details, @ipAddress, @statusCode, ${p.type === 'mssql' ? 'GETDATE()' : 'CURRENT_TIMESTAMP'});
       `;
 
-      const request = pool.request();
-      request.input('id', auditId);
-      request.input('userId', userId || null);
-      request.input('action', action);
-      request.input('resource', resource);
-      request.input('details', JSON.stringify(details));
-      request.input('ipAddress', ipAddress);
-      request.input('statusCode', statusCode);
-
-      await request.query(query);
+      await p.query(query, {
+        id: auditId,
+        userId: userId || null,
+        action,
+        resource,
+        details: JSON.stringify(details),
+        ipAddress,
+        statusCode
+      });
       logger.info(`Action logged: ${action} on ${resource}`);
     } catch (err) {
       logger.error('Audit log failed:', err);
@@ -31,41 +30,41 @@ class AuditService {
   }
 
   static async getAuditLog(filters = {}, limit = 100, offset = 0) {
-    const pool = await getPool();
+    const p = await getPool();
 
     try {
       let query = 'SELECT * FROM AuditLog WHERE 1=1';
-      const request = pool.request();
+      const params = {};
 
       if (filters.userId) {
         query += ' AND userId = @userId';
-        request.input('userId', filters.userId);
+        params.userId = filters.userId;
       }
 
       if (filters.action) {
         query += ' AND action LIKE @action';
-        request.input('action', `%${filters.action}%`);
+        params.action = `%${filters.action}%`;
       }
 
       if (filters.resource) {
         query += ' AND resource = @resource';
-        request.input('resource', filters.resource);
+        params.resource = filters.resource;
       }
 
       if (filters.startDate) {
-        query += ' AND createdAt >= @startDate';
-        request.input('startDate', filters.startDate);
+        query += ' AND "createdAt" >= @startDate';
+        params.startDate = filters.startDate;
       }
 
       if (filters.endDate) {
-        query += ' AND createdAt <= @endDate';
-        request.input('endDate', filters.endDate);
+        query += ' AND "createdAt" <= @endDate';
+        params.endDate = filters.endDate;
       }
 
-      query += ` ORDER BY createdAt DESC OFFSET ${offset} ROWS FETCH NEXT ${limit} ROWS ONLY;`;
+      query += ` ORDER BY "createdAt" DESC ${p.getPaginationSnippet(limit, offset)}`;
 
-      const result = await request.query(query);
-      return result.recordset || [];
+      const result = await p.query(query, params);
+      return result.rows || [];
     } catch (err) {
       logger.error('Get audit log failed:', err);
       throw err;
