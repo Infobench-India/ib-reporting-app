@@ -48,7 +48,7 @@ class PermissionService {
       const permissionId = uuidv4();
       const query = `
         INSERT INTO Permissions (id, name, description, action, resource, "isActive", "createdAt")
-        VALUES (@id, @name, @description, @action, @resource, true, ${p.type === 'mssql' ? 'GETDATE()' : 'CURRENT_TIMESTAMP'});
+        VALUES (@id, @name, @description, @action, @resource, 1, ${p.type === 'mssql' ? 'GETDATE()' : 'CURRENT_TIMESTAMP'});
       `;
 
       await p.query(query, {
