@@ -1,4 +1,0 @@
-{
-  "data": "{\"machineId\":\"fae81f43-4818-4c21-8a94-7ac886e2a660\",\"expiresAt\":null,\"features\":{\"sql_analytics\":true,\"scheduler\":true,\"audit_logs\":true,\"realtime_monitoring\":true,\"advanced_visuals\":true,\"unlimited_entities\":true,\"autoEmail\":true,\"numberOfEmails\":10,\"excelReport\":true,\"pdfReport\":true,\"numberOfReports\":10,\"numberOfChartsPerReport\":10},\"issuedAt\":\"2026-02-24T06:21:13.470Z\"}",
-  "signature": "mUhcEQeWVG8ROtgT0wMgPqYaIOhKOBWG/YdBYeqq2pDX5HtC86fapbtdouH4+J0RY6lCptVlNXzpSTKs4nEGy8OSfBRyOSUTWdJf3c5mbBXFpJB7WQXgnc/8wVM6IwwTtld4DQEUxQlBFJCL8b00f5tfCckS7PRZFnJgc4iKellLAEG6fHbFxR8jmKvOiv8bdhpJiqhooqRv4ohFsA0Y9OCecKvlszyUv0HND3FUv5TvfgKjbpUkk4iu1t2qUuDsTurwTji2jk0NDPN0rjTU/scSNbJzWi7n47C6wni8PbMyRDLLzDU/JL5XKPjNZeRSmNMphG3D7JLT4QCXWChxrw=="
-}
