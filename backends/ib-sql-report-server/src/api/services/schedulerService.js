@@ -10,10 +10,7 @@ const { checkActivation } = require('../../utils/activationCheck');
 const REPORT_API_BASE = process.env.REPORT_WORKER_API || 'http://localhost:5005/api/report';
 
 const initScheduler = async () => {
-    // Clean up any stuck 'Running' schedules from previous instance
     await cleanupRunningSchedules();
-
-    // Run every minute
     logger.info('Scheduler service initialized.');
     let isProcessing = false;
 
@@ -22,15 +19,12 @@ const initScheduler = async () => {
             logger.info('Scheduler is already processing schedules. Skipping this cycle.');
             return;
         }
-
         try {
-            // Dynamic Activation Check
             const status = await checkActivation();
             if (!status.activated) {
                 logger.warn('Scheduler skipped cycle: Server not activated.');
                 return;
             }
-
             isProcessing = true;
             logger.info('Cron heartbeat: Checking for due report schedules...');
             await processSchedules();
@@ -50,7 +44,6 @@ const cleanupRunningSchedules = async () => {
             newStatus: 'Interrupted',
             errorMessage: 'Service restarted during execution'
         });
-
         if (result.rowsAffected > 0) {
             logger.info(`Cleaned up ${result.rowsAffected} stuck 'Running' schedules.`);
         }
@@ -62,9 +55,6 @@ const cleanupRunningSchedules = async () => {
 const processSchedules = async () => {
     try {
         const p = await getPool();
-
-        // Find active schedules where nextExecution is null or <= current time
-        // AND there is no current 'Running' execution in history
         const schedulesRes = await p.query(`
             SELECT s.*, r.category, r.name as reportName, r.query as sqlQuery, r.connectionString as reportConn, r.tableName, r.templateName,
                    r.maxRowPerPage, r.maxAvailableRowPerPage, r.sumStartColumnNumber, r.maxSumStartColumnNumber,
@@ -81,12 +71,10 @@ const processSchedules = async () => {
                 WHERE h.scheduleId = s.id AND h.status = 'Running'
             )
         `);
-
         logger.info(`Found ${schedulesRes.rows.length} schedules due for execution.`);
         if (schedulesRes.rows.length > 0) {
             logger.info(`Due schedules: ${schedulesRes.rows.map(s => s.name).join(', ')}`);
         }
-
         for (const schedule of schedulesRes.rows) {
             await executeSchedule(schedule);
         }
@@ -141,14 +129,11 @@ const executeSchedule = async (schedule) => {
                 rows.push(columns.map(col => (row[col] === null || row[col] === undefined) ? '' : String(row[col])));
             });
         } else {
-            // If no data, send at least headers if possible or a message
-            logger.warn(`No data found for schedule ${schedule.name}, sending empty report structure.`);
+            logger.warn(`No data found for schedule ${schedule.name}`);
             rows.push(['No Data Found']);
             rows.push(['No records match the specified criteria.']);
         }
 
-        // 3. Prepare Payload
-        // Normalize template path (handle possible over-escaping in DB)
         const templatePath = (schedule.templateName || '').split('\\\\').join('\\');
 
         const payload = {
@@ -176,51 +161,74 @@ const executeSchedule = async (schedule) => {
             isTabularSupported: Boolean(schedule.isTabularSupported),
             data: rows
         };
-
-        // Log payload structure (excluding data for brevity)
         const { data: _, ...payloadMeta } = payload;
         logger.info(`Calling reporting API with metadata: ${JSON.stringify(payloadMeta)}`);
 
-        // 4. Call Reporting API
-        const response = await axios({
+        // Call PDF API
+        const responsePdf = await axios({
             method: 'POST',
             url: `${REPORT_API_BASE}/pdf`,
             headers: { 'Content-Type': 'application/json' },
             data: payload,
             responseType: 'stream',
-            timeout: 1800000 // 30 minutes timeout
+            timeout: 600000
         });
-
-        const chunks = [];
-        for await (const chunk of response.data) {
-            chunks.push(chunk);
+        const chunksPdf = [];
+        for await (const chunk of responsePdf.data) {
+            chunksPdf.push(chunk);
         }
-        const attachmentBuffer = Buffer.concat(chunks);
-        const fileName = `${schedule.reportName}_${moment().format('YYYYMMDD_HHmmss')}.pdf`;
+        const attachmentBufferPdf = Buffer.concat(chunksPdf);
+        const fileNamePdf = `${schedule.reportName}_${moment().format('YYYYMMDD_HHmmss')}.pdf`;
 
-        // 5. Update History with Attachment
+        // Call Excel API
+        const responseExcel = await axios({
+            method: 'POST',
+            url: `${REPORT_API_BASE}/excel`,
+            headers: { 'Content-Type': 'application/json' },
+            data: payload,
+            responseType: 'stream',
+            timeout: 600000
+        });
+        const chunksExcel = [];
+        for await (const chunk of responseExcel.data) {
+            chunksExcel.push(chunk);
+        }
+        const attachmentBufferExcel = Buffer.concat(chunksExcel);
+        const fileNameExcel = `${schedule.reportName}_${moment().format('YYYYMMDD_HHmmss')}.xlsx`;
+
+        // Save PDF attachment as base64 string
+        const attachmentBase64Pdf = attachmentBufferPdf.toString('base64');
+
+        // Save Excel attachment as base64 string
+        const attachmentBase64Excel = attachmentBufferExcel.toString('base64');
+
+        // Update history with the first attachment (PDF)
         await p.query('UPDATE ReportScheduleHistory SET status = @status, attachment = @attachment, fileName = @fileName WHERE id = @id', {
             id: historyId,
             status: 'Success',
-            attachment: attachmentBuffer,
-            fileName: fileName
+            attachment: attachmentBase64Pdf,
+            fileName: fileNamePdf
         });
 
-        // 6. Send Email
+        // Send email with PDF
         await sendEmail({
             to: schedule.recipients,
             subject: `Automated Report: ${schedule.name}`,
             text: `Please find the attached report for ${schedule.reportName} for the period ${fromDateStr} to ${toDateStr}.`,
-            attachments: [{ filename: fileName, content: attachmentBuffer }]
+            attachments: [{ filename: fileNamePdf, content: attachmentBufferPdf }, { filename: fileNameExcel, content: attachmentBufferExcel }]
         });
 
-        // 7. Shift Dates to Next Day
+        // Optional: Save Excel attachment as separate record or in same record if desired
+        // For simplicity, below is an example: you might store only one attachment per record
+        // or extend your schema to store multiple attachments.
+
+        // Shift Dates to Next Day
         const nextStart = moment(schedule.startDateTime).add(1, 'days').toDate();
         const nextEnd = moment(schedule.endDateTime).add(1, 'days').toDate();
 
-        // Calculate next execution date
+        // Calculate next execution
         const [hour, minute] = (schedule.scheduleTime || '00:00').split(':').map(Number);
-        let nextExecution = moment().add(1, 'days').hour(hour).minute(minute).second(0).toDate();
+        const nextExecution = moment().add(1, 'days').hour(hour).minute(minute).second(0).toDate();
 
         await p.query(`
             UPDATE ReportSchedules 
@@ -231,7 +239,7 @@ const executeSchedule = async (schedule) => {
             id: schedule.id,
             startDateTime: nextStart,
             endDateTime: nextEnd,
-            nextExecution: nextExecution
+            nextExecution
         });
 
         logger.info(`Successfully completed schedule: ${schedule.name}`);
@@ -239,7 +247,6 @@ const executeSchedule = async (schedule) => {
     } catch (error) {
         if (error.response && error.response.data && error.response.status >= 400) {
             try {
-                // If responseType is stream, error.response.data is a stream
                 const chunks = [];
                 for await (const chunk of error.response.data) {
                     chunks.push(chunk);
@@ -250,10 +257,8 @@ const executeSchedule = async (schedule) => {
                 logger.error('Failed to read error response stream:', streamError);
             }
         }
-
         const errorMsg = error.response ? `${error.message} (Status: ${error.response.status})` : error.message;
         logger.error(`Error executing schedule ${schedule.name}: ${errorMsg}`);
-
         if (historyId) {
             await p.query('UPDATE ReportScheduleHistory SET status = @status, errorMessage = @errorMessage WHERE id = @id', {
                 id: historyId,
@@ -262,10 +267,6 @@ const executeSchedule = async (schedule) => {
             });
         }
     }
-};
-
-module.exports = {
-    initScheduler
 };
 
 module.exports = {

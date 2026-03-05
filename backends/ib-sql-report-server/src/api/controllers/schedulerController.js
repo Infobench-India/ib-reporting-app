@@ -15,7 +15,10 @@ exports.createSchedule = async (req, res) => {
         const features = license.features || {};
 
         if (features.autoEmail && features.numberOfEmails && data.recipients) {
-            const recipientCount = data.recipients.split(',').map(e => e.trim()).filter(e => e).length;
+            const recipientCount = data.recipients
+                .split(',')
+                .map(e => e.trim())
+                .filter(e => e).length;
             if (recipientCount > features.numberOfEmails) {
                 return res.status(403).json({
                     success: false,
@@ -32,8 +35,6 @@ exports.createSchedule = async (req, res) => {
         } else {
             const [hour, minute] = (data.scheduleTime || '00:00').split(':').map(Number);
             nextExecution = moment().hour(hour).minute(minute).second(0);
-
-            // If the time has already passed today, schedule for tomorrow
             if (nextExecution.isBefore(moment())) {
                 nextExecution.add(1, 'days');
             }
@@ -83,7 +84,6 @@ exports.getScheduleById = async (req, res) => {
     try {
         const p = await getPool();
         const result = await p.query('SELECT * FROM ReportSchedules WHERE id = @id', { id: req.params.id });
-
         if (result.rows.length === 0) {
             return res.status(404).json({ success: false, errors: ['Schedule not found'] });
         }
@@ -104,7 +104,10 @@ exports.updateSchedule = async (req, res) => {
         const features = license.features || {};
 
         if (features.autoEmail && features.numberOfEmails && data.recipients) {
-            const recipientCount = data.recipients.split(',').map(e => e.trim()).filter(e => e).length;
+            const recipientCount = data.recipients
+                .split(',')
+                .map(e => e.trim())
+                .filter(e => e).length;
             if (recipientCount > features.numberOfEmails) {
                 return res.status(403).json({
                     success: false,
@@ -229,9 +232,13 @@ exports.downloadAttachment = async (req, res) => {
         }
 
         const { attachment, fileName } = result.rows[0];
+
+        // Decode base64 to Buffer
+        const attachmentBuffer = Buffer.from(attachment, 'base64');
+
         res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
         res.setHeader('Content-Type', fileName.endsWith('.pdf') ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        return res.send(attachment);
+        return res.send(attachmentBuffer);
     } catch (error) {
         logger.error('Error downloading attachment:', error);
         return res.status(500).json({ success: false, errors: [error.message] });
@@ -244,11 +251,11 @@ exports.resendReport = async (req, res) => {
         const historyId = req.params.id;
 
         const historyRes = await p.query(`
-                SELECT h.*, s.recipients, s.name as scheduleName 
-                FROM ReportScheduleHistory h 
-                JOIN ReportSchedules s ON h.scheduleId = s.id 
-                WHERE h.id = @id
-            `, { id: historyId });
+            SELECT h.*, s.recipients, s.name as scheduleName 
+            FROM ReportScheduleHistory h 
+            JOIN ReportSchedules s ON h.scheduleId = s.id 
+            WHERE h.id = @id
+        `, { id: historyId });
 
         if (historyRes.rows.length === 0) {
             return res.status(404).json({ success: false, errors: ['History record not found'] });
@@ -257,13 +264,16 @@ exports.resendReport = async (req, res) => {
         const history = historyRes.rows[0];
         const { attachment, fileName, recipients, scheduleName } = history;
 
-        // Trigger email (re-using notification logic)
+        // Decode base64 to Buffer for email attachment
+        const attachmentBuffer = Buffer.from(attachment, 'base64');
+
+        // Send email
         const { sendEmail } = require('../services/emailService');
         await sendEmail({
             to: recipients,
             subject: `Resend: Report for ${scheduleName}`,
             text: `Please find the attached report for ${scheduleName} executed on ${new Date(history.executionTime).toLocaleString()}.`,
-            attachments: [{ filename: fileName, content: attachment }]
+            attachments: [{ filename: fileName, content: attachmentBuffer }]
         });
 
         return res.json({ success: true, message: 'Report resent successfully' });

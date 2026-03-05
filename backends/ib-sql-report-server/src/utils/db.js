@@ -251,17 +251,17 @@ const ensureTables = async (ConnectionString) => {
 
         // 6. ReportScheduleHistory
         await p.query(tableQuery('ReportScheduleHistory', `
-            CREATE TABLE ReportScheduleHistory (
-                id ${type_id},
-                scheduleId INT ${isMssql ? 'FOREIGN KEY REFERENCES ReportSchedules(id) ON DELETE CASCADE' : 'REFERENCES ReportSchedules(id) ON DELETE CASCADE'},
-                executionTime ${type_timestamp},
-                status ${p.type === 'mssql' ? 'NVARCHAR(50)' : 'VARCHAR(50)'},
-                attachment ${p.type === 'mssql' ? 'VARBINARY(MAX)' : 'BYTEA'},
-                fileName ${type_string},
-                errorMessage ${type_text},
-                createdAt ${type_timestamp}
-            )
-        `));
+    CREATE TABLE ReportScheduleHistory (
+        id ${type_id},
+        scheduleId INT ${isMssql ? 'FOREIGN KEY REFERENCES ReportSchedules(id) ON DELETE CASCADE' : 'REFERENCES ReportSchedules(id) ON DELETE CASCADE'},
+        executionTime ${type_timestamp},
+        status ${p.type === 'mssql' ? 'NVARCHAR(50)' : 'VARCHAR(50)'},
+        attachment ${p.type === 'mssql' ? 'NVARCHAR(MAX)' : 'TEXT'},
+        fileName ${type_string},
+        errorMessage ${type_text},
+        createdAt ${type_timestamp}
+    )
+`));
 
         logger.info('Database tables verified/created successfully.');
     } catch (err) {
